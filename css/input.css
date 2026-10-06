@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@source "../index.html";
+@source "../js";
+
+@layer base {
+  body { font-family: "Segoe UI", Arial, sans-serif; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; opacity: .45; }
+  [hidden] { display: none !important; }
+}
+@layer components {
+  .field { @apply mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100; }
+  .label { @apply block text-xs font-medium text-zinc-700; }
+  .primary { @apply inline-flex items-center justify-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-xs font-medium text-white hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2; }
+  .secondary { @apply inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2; }
+  .card { @apply overflow-hidden rounded-xl border border-zinc-200 bg-white; }
+}
+dialog::backdrop { background: rgb(0 0 0 / .3); }
+
+/* Preflight menghapus margin bawaan dialog; pulihkan pemusatan modal secara eksplisit. */
+#open-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+}

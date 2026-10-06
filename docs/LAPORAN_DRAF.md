@@ -1,107 +1,122 @@
 # LAPORAN TUGAS PROYEK KRIPTOGRAFI
 
-## Halaman Judul
-
-**Rancang Bangun Prototipe Aplikasi Catatan Konseling Menggunakan Enkripsi Berlapis Substitusi Monoalfabetik, Vigenere, dan Transposisi Kolom**
+## Halaman judul
+**RuangCatat Mini: Prototipe Web Catatan Konseling dengan Substitusi Monoalfabetik,
+Vigenère, dan Transposisi Kolom**
 
 Mata kuliah: Kriptografi (IF21A05)  
-Nama aplikasi: RuangCatat  
-Kelas: [isi]  
-Dosen: [isi]  
-Kelompok/anggota dan NIM: [isi, maksimal 5 orang]  
-Institusi dan tahun: [isi]
+Kelas / dosen: [isi]  
+Anggota dan NIM: [isi, maksimal 5 anggota]  
+Institusi / tahun: [isi]
 
-## Deskripsi Singkat Program
+## Deskripsi program
+RuangCatat Mini adalah satu halaman web lokal untuk menyimpan catatan konseling
+fiktif dengan kode klien samaran. Pengguna mengisi kode, tanggal dan isi catatan,
+memasukkan tiga kunci, lalu mengenkripsi dan menyimpan. Catatan dapat dibuka
+dengan kunci yang sama atau dihapus setelah konfirmasi.
 
-RuangCatat merupakan prototipe web lokal untuk mengelola catatan konseling fiktif berdasarkan kode klien samaran. Program menyediakan dashboard, riwayat sesi, catatan tersandi, status tindak lanjut, impor/ekspor, serta halaman demonstrasi algoritma. Dibangun menggunakan HTML/CSS/JavaScript, Python, dan SQLite tanpa paket kriptografi siap pakai.
+Teknologi: HTML, JavaScript vanilla, Tailwind CSS lokal, localStorage. Aplikasi
+dijalankan melalui VS Code Live Server. Tidak memiliki backend atau database
+aktif. Fungsi kriptografi ditulis sendiri, tanpa paket kriptografi.
 
-Topik, isi catatan, dan rencana tindak lanjut diserialisasi sebagai JSON dan dienkripsi. Kode klien, tanggal sesi, jadwal berikutnya, dan status tidak dienkripsi. Kunci tidak disimpan. Produk tidak dimaksudkan untuk penggunaan data konseling asli karena algoritma klasik tidak memberikan keamanan modern.
-
-## Algoritma dan Alur Program
-
+## Algoritma dan modularitas
 ### Substitusi Monoalfabetik
+Kata kunci dinormalisasi menjadi huruf besar. Huruf duplikat dihapus kemudian
+alfabet yang belum muncul ditambahkan. Pemetaan alfabet biasa ke alfabet kunci
+dipakai untuk enkripsi, pemetaan invers untuk dekripsi. Besar/kecil dipertahankan.
 
-Huruf berulang pada kata kunci dihapus, lalu sisa huruf alfabet ditambahkan sehingga terbentuk permutasi 26 huruf. Huruf plainteks diganti melalui pemetaan; dekripsi memakai pemetaan invers. Huruf besar/kecil dipertahankan.
-
-### Vigenere
-
-A=0 sampai Z=25. Untuk posisi huruf i, enkripsi `C_i=(P_i+K_i) mod 26`, dekripsi `P_i=(C_i-K_i) mod 26`. Kunci diulang. Karakter selain A-Z/a-z tetap dan tidak menghabiskan posisi kunci.
+### Vigenère
+A=0 hingga Z=25. Enkripsi C=(P+K) mod 26; dekripsi P=(C-K+26) mod 26.
+Kunci diulang hanya untuk huruf A–Z/a–z. Karakter lain tetap di posisinya dan
+tidak menghabiskan posisi kunci.
 
 ### Transposisi Kolom
+Teks ditulis secara konseptual per baris selebar kata kunci. Kolom dibaca
+menurut huruf kunci yang diurutkan alfabetis, dengan indeks asal sebagai pembeda
+untuk huruf yang sama. Untuk dekripsi, panjang kolom dihitung dari pembagian
+jumlah karakter dengan lebar; kolom kiri memperoleh sisa karakter. Karakter
+disusun kembali per baris. Tanpa padding; emoji diperlakukan sebagai code point.
 
-Teks disusun secara konseptual baris demi baris dengan lebar sebesar panjang kata kunci. Kolom dibaca berdasarkan urutan alfabet kunci; huruf kunci berulang diurutkan berdasarkan indeks asal. Dekripsi menghitung panjang setiap kolom dari hasil pembagian panjang teks dengan lebar, kemudian menyusun karakter menurut posisi aslinya. Tidak ada padding.
+Setiap algoritma mempunyai encrypt(text,key) dan decrypt(text,key) pada berkas
+terpisah. pipeline.js merangkai algoritma serta menyertakan hasil setiap tahap.
+app.js menangani alur; ui.js merender tampilan; storage.js menangani penyimpanan.
 
-### Enkripsi dan penyimpanan
+## Alur program
+Enkripsi:
+input → validasi → JSON berpenanda format → Monoalfabetik → Vigenère → Kolom →
+dekripsi balik dan perbandingan identik → simpan cipherteks beserta metadata.
 
-Input catatan → validasi formulir/kunci → serialisasi JSON → substitusi monoalfabetik → Vigenere → transposisi kolom → dekripsi uji → bandingkan identik → simpan cipherteks dan metadata dalam SQLite.
+Pembukaan:
+pilih catatan → isi kembali tiga kunci → balik Kolom → balik Vigenère →
+balik Monoalfabetik → validasi format JSON → tampilkan catatan.
+Format salah menghasilkan pesan “Kunci salah atau data rusak”.
+Penghapusan:
+pilih Hapus → konfirmasi → hapus record → perbarui daftar. Batal tidak mengubah data.
 
-### Pembukaan dan pembaruan
+localStorage menyimpan versi, ID, kode klien, tanggal, waktu penambahan, cipherteks.
+Kunci dan plainteks tidak disimpan. Metadata tetap terbuka. Pemeriksaan format
+bukan jaminan autentikasi, dan enkripsi klasik tidak cocok untuk data konseling asli.
 
-Pilih sesi → masukkan kunci → balik transposisi → balik Vigenere → balik substitusi → validasi struktur JSON → tampilkan isi. Jika hasil tidak valid, editor tetap terkunci dan arsip tidak ditimpa. Sesudah membuka, pengguna dapat mengedit dan menyimpan dengan kunci yang sedang dimasukkan.
+## Screenshot dan penjelasan
+Screenshot diambil dari aplikasi yang berjalan di localhost dengan data fiktif.
+Ganti atau tambahkan screenshot hasil pelaksanaan kelompok jika diperlukan.
 
-### Impor/ekspor
+### Formulir dan catatan tersimpan
+![Halaman mini](screenshots/mini-halaman.png)
+Pesan validasi muncul setelah dekripsi identik dan penulisan berhasil.
+Formulir serta kunci dibersihkan; daftar berisi metadata dan tombol tindakan.
 
-Ekspor menghasilkan paket JSON berisi versi format, urutan algoritma, kode klien, tanggal, status, dan cipherteks. Impor memeriksa format, tanggal, kode, dan hasil dekripsi sebelum transaksi SQLite. Setiap impor membuat sesi baru; klien dengan kode yang sama digunakan kembali.
+### Hasil dekripsi
+![Hasil dekripsi](screenshots/mini-dekripsi.png)
+Isi yang dibuka dipulihkan persis termasuk Unicode dan baris baru.
+Teks mirip markup ditampilkan sebagai teks biasa.
 
-### Arsitektur modular
-
-Antarmuka web menangani interaksi; API HTTP lokal menghubungkan browser ke service. Versi desktop tetap tersedia sebagai alternatif. Service menangani validasi dan enkripsi catatan. Repository menangani SQLite. Modul crypto hanya berisi algoritma serta pipeline, sehingga dapat diuji tanpa GUI/database.
-
-## Screenshot dan Penjelasan
-
-Screenshot berikut diambil dari aplikasi web yang berjalan, menggunakan database uji dan data fiktif:
-
-### Dashboard
-![Dashboard web](screenshots/web-dashboard.png)
-
-### Daftar klien dan riwayat sesi
-![Riwayat sesi web](screenshots/web-riwayat.png)
-
-### Formulir sesi baru
-![Formulir catatan](screenshots/web-formulir.png)
-
-### Catatan setelah dibuka
-![Catatan terbuka](screenshots/web-catatan-terbuka.png)
-
-### Demo dekripsi dan validasi identik
-![Demo algoritma](screenshots/web-demo.png)
-
-### Tampilan mobile
-![Tampilan mobile](screenshots/web-mobile.png)
+### Tampilan perangkat kecil
+![Tampilan kecil](screenshots/mini-mobile.png)
+Formulir disusun satu kolom, dengan tabel sederhana di bawahnya.
 
 ## Pengujian
-
-Jalankan `python -m unittest discover -s tests -v`. Hasil pengujian otomatis: 27 tes lulus pada Windows, 5 Oktober 2026, menggunakan Python bawaan Codex. Uji browser Edge juga lulus. Rincian ada di HASIL_PENGUJIAN.md; kelompok perlu menambahkan hasil pengujian mandiri.
-
-| Kelompok uji | Tujuan | Hasil aktual |
-|---|---|---|
-| Vektor diketahui tiap algoritma | Memastikan implementasi sesuai perhitungan referensi | Lulus |
-| Round-trip Unicode/format/kosong/panjang | Memastikan dekripsi identik | Lulus |
-| Kunci berulang dan kolom tak penuh | Memastikan invers transposisi benar | Lulus |
-| Simpan/buka/edit/status dan persistensi | Memastikan alur arsip berjalan | Lulus |
-| Salah kunci dan file rusak | Memastikan kegagalan tidak menimpa arsip | Lulus |
-| Ekspor/impor dan privasi penyimpanan | Memastikan paket dapat dipulihkan tanpa menyimpan kunci/plainteks | Lulus |
-| GUI | Memastikan interaksi utama berjalan | Lulus |
-
-Validasi pemulihan bukan pembuktian keamanan. Validasi struktur JSON hanya menolak hasil yang tidak sesuai format dan tidak menjamin deteksi semua manipulasi.
+Pada 6 Oktober 2026, 21 tes Node.js lulus dan uji browser Edge headless lulus.
+Pengujian mencakup vektor diketahui, invers rangkaian, kunci berulang, kolom tidak
+penuh, Unicode, kasus kosong/panjang, format storage, persistensi, privasi,
+gagal simpan, salah kunci, hapus/batal, dan data rusak.
+Rincian serta batas pemeriksaan tersedia dalam HASIL_PENGUJIAN.md.
+[Tambahkan hasil pengujian mandiri kelompok.]
 
 ## Kesimpulan
+Prototipe memenuhi input plainteks, input kunci, enkripsi, dekripsi dan validasi
+kesamaan teks menggunakan tiga algoritma klasik. Pemisahan modul memudahkan
+penjelasan dan pengujian setiap algoritma. Penyimpanan lokal mendukung pembukaan
+ulang setelah refresh. Algoritma ini untuk pembelajaran dengan data fiktif.
+[Sesuaikan dengan evaluasi kelompok.]
 
-Prototipe menerapkan tiga algoritma klasik secara berlapis, mencakup substitusi dan transposisi, dengan enkripsi/dekripsi serta validasi identik. Konteks produk berupa pengarsipan catatan konseling fiktif. Penggunaan nyata memerlukan kriptografi modern dan pengelolaan akses yang memadai. [Sesuaikan kesimpulan dengan hasil pengujian kelompok.]
-
-## Pembagian Tugas Kelompok
-
-Tabel berikut usulan pembagian, bukan klaim pekerjaan anggota. Isi sesuai kontribusi sebenarnya; gabungkan tanggung jawab jika anggota kurang dari lima.
+## Pembagian tugas
+Usulan berikut harus diisi berdasarkan kontribusi sebenarnya.
 
 | Anggota/NIM | Tanggung jawab | Kontribusi aktual |
 |---|---|---|
-| [Anggota 1] | Substitusi Monoalfabetik dan dokumentasi | [isi] |
-| [Anggota 2] | Vigenere dan pipeline | [isi] |
-| [Anggota 3] | Transposisi Kolom dan pengujian crypto | [isi] |
-| [Anggota 4] | SQLite, service, impor/ekspor | [isi] |
-| [Anggota 5] | GUI, pengujian penggunaan, laporan | [isi] |
+| [1] | Substitusi Monoalfabetik dan penjelasan | [isi] |
+| [2] | Vigenère dan pipeline | [isi] |
+| [3] | Transposisi Kolom dan pengujian algoritma | [isi] |
+| [4] | localStorage dan pengujian penyimpanan | [isi] |
+| [5] | Antarmuka, uji browser dan laporan | [isi] |
+
+## Kesesuaian penugasan
+| Ketentuan | Implementasi |
+|---|---|
+| Minimal 3 algoritma, substitusi dan transposisi | Monoalfabetik, Vigenère, Kolom |
+| Input plainteks langsung atau file | Textarea input langsung |
+| Input kunci | Tiga input dengan tampilkan/sembunyikan |
+| Enkripsi dan dekripsi | Simpan dan Buka |
+| Validasi identik | Perbandingan string sebelum penyimpanan |
+| Komentar dan tanpa paket kriptografi | Modul logika JavaScript buatan sendiri |
+| Struktur laporan dan kontribusi | Bagian laporan dan tabel anggota |
+
+Pastikan keunikan kombinasi algoritma di kelas sebelum pengumpulan.
+Fitur file, kriptanalisis dan lainnya dalam penugasan bersifat tambahan.
 
 ## Referensi
-
-- Petunjuk tugas: TUGAS PROYEK KRIPTOGRAFI.pdf.
-- Materi kuliah: 4-Algoritma_Klasik1 (1).pdf; 5-Algoritma_Klasik2 (1).pdf; 7-Algoritma_Klasik3 (1).pdf.
+- TUGAS PROYEK KRIPTOGRAFI.pdf.
+- 4-Algoritma_Klasik1 (1).pdf; 5-Algoritma_Klasik2 (1).pdf;
+  7-Algoritma_Klasik3 (1).pdf.
+- Dokumentasi Tailwind CLI: https://tailwindcss.com/docs/installation/tailwind-cli

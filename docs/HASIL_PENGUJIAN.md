@@ -1,24 +1,53 @@
-# Hasil Pengujian RuangCatat
+# Hasil pengujian RuangCatat Mini
+Tanggal: 6 Oktober 2026. Platform: Windows, Node.js, Edge headless.
+Gunakan data fiktif. Hasil ini tidak membuktikan kekuatan keamanan kriptografi.
 
-Tanggal: 5 Oktober 2026 (Asia/Jakarta). Lingkungan: Windows, Python bawaan Codex, Tk 8.6.
+## Otomatis
+Perintah npm test: **21 tes lulus, 0 gagal**.
+- 9 tes crypto: vektor yang diketahui untuk tiap algoritma; invers urutan;
+  Unicode, CRLF, campuran besar/kecil, karakter nonhuruf; kosong/satu karakter/
+  teks panjang; kunci berulang; panjang kolom tidak penuh; 200 variasi teks;
+  kunci kosong atau non-Latin ditolak.
+- 12 tes storage: kosong, simpan/baca ulang dan urutan terbaru termasuk waktu sama,
+  hapus, duplikasi/missing ID, schema dan tanggal, JSON rusak tanpa penimpaan,
+  ID duplikat, akses ditolak, quota gagal tanpa mengubah data, cipherteks
+  tersimpan tanpa plainteks/kunci serta dapat didekripsi.
 
-Perintah: `python -B -m unittest discover -s tests -v` memakai executable runtime bawaan Codex.
+## Browser
+Aplikasi dilayani oleh server statis sementara di http://127.0.0.1:5501,
+dengan file yang sama seperti Live Server. Server pengujian bukan bagian produk.
+- Simpan → refresh → Buka dengan kunci benar: lulus.
+- Pesan validasi hanya setelah penyimpanan berhasil: lulus.
+- Salah kunci: pesan kesalahan, hasil tidak dibuka: lulus.
+- Tombol tampilkan/sembunyikan dan pembersihan kunci sesudah dialog/Escape: lulus.
+- Hapus dibatalkan: data tetap; konfirmasi Hapus: data hilang.
+- Quota disimulasikan gagal: tidak ada record baru, formulir dipertahankan.
+- JSON localStorage rusak: pesan, simpan nonaktif, data rusak tetap tidak ditimpa.
+- Akses storage diblokir: pesan dan simpan nonaktif.
+- Isi seperti <img ...> muncul sebagai teks, tidak membentuk elemen HTML.
+- localStorage tidak berisi teks awal atau tiga kunci contoh.
+- Tidak ada error JavaScript browser maupun permintaan resource eksternal/API.
+  CSS berasal dari file lokal; tidak ada resource yang membutuhkan internet.
+- Tampilan desktop 1440 px dan mobile 390 px diperiksa melalui screenshot.
+  Tidak ada overflow halaman horizontal pada viewport mobile.
 
-Hasil: **20 pengujian lulus, 0 gagal, 0 dilewati**.
+Screenshot aktual: screenshots/mini-halaman.png, mini-dekripsi.png, mini-mobile.png.
+Ekstensi Live Server sendiri tidak diuji otomatis; pengujian menggunakan server
+statis localhost dengan perilaku penyajian file yang sama.
 
-- 7 pengujian algoritma: vektor diketahui, validasi kunci, urutan invers, edge cases dan 180 panjang teks acak deterministik.
-- 9 pengujian service/database: CRUD catatan, persistensi, kode unik/pencarian, salah kunci, privasi, impor/ekspor dan data tidak valid.
-- 4 pengujian GUI Tk nyata: demo, teks kosong, editor simpan/buka/edit/status, dan editor tetap terkunci saat kunci salah. Dialog informasi dimock supaya tes tidak menunggu interaksi.
+## Pemeriksaan proyek
+- npm run build:css berhasil; CSS hasil build disertakan.
+- npm audit: 0 kerentanan setelah override @parcel/watcher ke 2.6.0.
+- Database lama diarsipkan, hash SHA-256 sebelum/sesudah identik:
+  1E50E7AAB6B4D96032E4D39D5D0E199ECD763B7BDE4501D224DECD6F7A66FF55
+- Python, peluncur lama dan tes Python dihapus setelah pengganti lulus.
 
-Tes memakai database sementara. Tidak ada catatan asli yang dimasukkan. Pengujian GUI dilakukan secara otomatis dengan jendela disembunyikan; screenshot dan pemeriksaan visual manual belum termasuk hasil ini.
+Pemeriksaan format catatan bukan autentikasi kriptografis. Catatan browser
+dibatasi origin dan profil; metadata tetap terbuka. Tambahkan pengujian kelompok
+dan screenshot sendiri sebelum laporan final dikumpulkan.
 
-Temuan lingkungan: `py -3` melaporkan tidak ada instalasi Python. Peluncur Windows menyediakan fallback runtime bawaan Codex yang mempunyai Tkinter dan SQLite.
-
-Pemeriksaan peluncur `Jalankan.bat --check` berhasil. Python yang ditemukan lewat perintah `python` adalah Python 3.13 di AppData; 4 tes GUI tambahan juga lulus dengan interpreter tersebut. Jadi aplikasi dapat memakai Python sistem pada perangkat ini, sementara fallback Codex tetap tersedia.
-
-## Pembaruan versi web
-
-- Seluruh **27 tes Python lulus**, termasuk 7 tes baru API web: static/bootstrap, kontrol akses, create/open/status/dashboard, edit dengan verifikasi kunci lama dan penggantian kunci, impor/ekspor, demo format/Unicode, serta request salah.
-- Uji browser Edge headless lulus: tambah klien, simpan/buka/edit sesi, kunci salah tetap terkunci, enkripsi ulang dengan kunci baru, status, ekspor/impor, pemulihan file Unicode dan CRLF, validasi gagal untuk cipherteks rusak, bersihkan demo, dan viewport mobile 390px tanpa overflow halaman.
-- Tidak ada JavaScript page errors selama uji browser. Screenshot aktual disimpan dalam `screenshots/` dan diperiksa secara visual.
-- Database browser-test terpisah dari database aplikasi; seluruh isi merupakan data fiktif.
+## Perbaikan dialog dan kesiapan hosting
+Dialog kini dipusatkan eksplisit dengan inset:0 dan margin:auto setelah reset
+Tailwind, dengan batas tinggi viewport dan scroll internal.
+Uji browser hasil dist/ lulus di 1440×900, 1920×1080, 390×844 dan 390×460.
+Build aset hosting berhasil. Deployment Vercel belum dijalankan pada akun pengguna.
