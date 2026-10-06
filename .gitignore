@@ -1,5 +1,5 @@
 node_modules/
+__pycache__/
+*.pyc
 data-lama/
 .DS_Store
-dist/
-.vercel/

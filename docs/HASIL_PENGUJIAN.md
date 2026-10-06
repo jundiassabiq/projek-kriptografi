@@ -1,53 +1,47 @@
-# Hasil pengujian RuangCatat Mini
-Tanggal: 6 Oktober 2026. Platform: Windows, Node.js, Edge headless.
-Gunakan data fiktif. Hasil ini tidak membuktikan kekuatan keamanan kriptografi.
+# Hasil pengujian RuangCatat File
+Tanggal: 6 Oktober 2026. Windows, Python pustaka standar, browser Edge headless.
 
-## Otomatis
-Perintah npm test: **21 tes lulus, 0 gagal**.
-- 9 tes crypto: vektor yang diketahui untuk tiap algoritma; invers urutan;
-  Unicode, CRLF, campuran besar/kecil, karakter nonhuruf; kosong/satu karakter/
-  teks panjang; kunci berulang; panjang kolom tidak penuh; 200 variasi teks;
-  kunci kosong atau non-Latin ditolak.
-- 12 tes storage: kosong, simpan/baca ulang dan urutan terbaru termasuk waktu sama,
-  hapus, duplikasi/missing ID, schema dan tanggal, JSON rusak tanpa penimpaan,
-  ID duplikat, akses ditolak, quota gagal tanpa mengubah data, cipherteks
-  tersimpan tanpa plainteks/kunci serta dapat didekripsi.
+## Pengujian Python
+Perintah: python -m unittest discover -s tests -v
+**26 tes lulus, 0 gagal**:
+- 11 tes algoritma/frekuensi: vektor Monoalfabetik, Vigenère dan Kolom;
+  posisi kunci non-Latin; kunci berulang/tidak valid; format/Unicode;
+  urutan invers; 200 variasi panjang; frekuensi diketahui dan tanpa huruf.
+- 9 tes catatan/file: round-trip UTF-8/Unicode/CRLF; file tanpa plaintext atau
+  kunci; salah tiap kunci; data rusak tanpa mutasi; format invalid; penanda wajib;
+  validasi input; ukuran besar; batas tepat file 1 MB.
+- 6 tes HTTP: round-trip API, status kesalahan, JSON rusak, content type,
+  batas request, allowlist file statis (source/arsip tidak dapat diakses).
 
-## Browser
-Aplikasi dilayani oleh server statis sementara di http://127.0.0.1:5501,
-dengan file yang sama seperti Live Server. Server pengujian bukan bagian produk.
-- Simpan → refresh → Buka dengan kunci benar: lulus.
-- Pesan validasi hanya setelah penyimpanan berhasil: lulus.
-- Salah kunci: pesan kesalahan, hasil tidak dibuka: lulus.
-- Tombol tampilkan/sembunyikan dan pembersihan kunci sesudah dialog/Escape: lulus.
-- Hapus dibatalkan: data tetap; konfirmasi Hapus: data hilang.
-- Quota disimulasikan gagal: tidak ada record baru, formulir dipertahankan.
-- JSON localStorage rusak: pesan, simpan nonaktif, data rusak tetap tidak ditimpa.
-- Akses storage diblokir: pesan dan simpan nonaktif.
-- Isi seperti <img ...> muncul sebagai teks, tidak membentuk elemen HTML.
-- localStorage tidak berisi teks awal atau tiga kunci contoh.
-- Tidak ada error JavaScript browser maupun permintaan resource eksternal/API.
-  CSS berasal dari file lokal; tidak ada resource yang membutuhkan internet.
-- Tampilan desktop 1440 px dan mobile 390 px diperiksa melalui screenshot.
-  Tidak ada overflow halaman horizontal pada viewport mobile.
+## Pengujian browser
+Aplikasi dijalankan pada http://127.0.0.1:8000.
+- Isi Unicode → enkripsi → unduh K-111.json → unggah → dekripsi identik.
+- Aksara Arab, Mandarin, Yunani, Rusia, emoji dan baris baru dipulihkan.
+- File hanya mempunyai format dan ciphertext; tidak memuat teks asli,
+  kode klien, atau tiga kunci contoh.
+- Salah kunci: pesan, hasil tetap tersembunyi. Berkas asli tidak berubah.
+- File JSON rusak, versi lama, dan melebihi 1 MB: ditolak dengan pesan.
+- Analisis memuat 26 baris, jumlah dan persentase.
+- Bersihkan mengosongkan input, kunci, file pilihan, hasil dan tabel frekuensi.
+- Tombol/input dinonaktifkan selama permintaan berlangsung.
+- Kegagalan jaringan disimulasikan: pesan jalankan server, input dipertahankan,
+  tombol kembali tersedia.
+- Teks seperti <img ...> dirender sebagai teks, bukan elemen aktif.
+- Desktop 1440×1100 dan mobile 390×844 diperiksa melalui screenshot.
+  Tidak ditemukan overflow halaman horizontal di mobile.
+- Tidak ada pageerror JavaScript atau permintaan resource eksternal.
+- Tidak ada operasi localStorage di kode aplikasi; penyimpanan lewat unduhan.
 
-Screenshot aktual: screenshots/mini-halaman.png, mini-dekripsi.png, mini-mobile.png.
-Ekstensi Live Server sendiri tidak diuji otomatis; pengujian menggunakan server
-statis localhost dengan perilaku penyajian file yang sama.
+Screenshot aktual: file-enkripsi.png, file-dekripsi.png, file-mobile.png.
 
-## Pemeriksaan proyek
-- npm run build:css berhasil; CSS hasil build disertakan.
-- npm audit: 0 kerentanan setelah override @parcel/watcher ke 2.6.0.
-- Database lama diarsipkan, hash SHA-256 sebelum/sesudah identik:
-  1E50E7AAB6B4D96032E4D39D5D0E199ECD763B7BDE4501D224DECD6F7A66FF55
-- Python, peluncur lama dan tes Python dihapus setelah pengganti lulus.
+## Build dan kompatibilitas
+CSS lokal dibangun dengan npm run build:css. Hasil disertakan agar tidak
+memerlukan npm/internet saat penggunaan.
+Algoritma/storage JavaScript, tes versi lama, dan konfigurasi Vercel dihapus
+sesudah pengganti lulus. Arsip data-lama tidak diubah dan tidak dibaca aplikasi.
+File versi lama tidak dimigrasikan; storage browser lama tidak dihapus.
+Server hanya menyediakan localhost. Server/kunci/catatan tidak diarsipkan di disk.
 
-Pemeriksaan format catatan bukan autentikasi kriptografis. Catatan browser
-dibatasi origin dan profil; metadata tetap terbuka. Tambahkan pengujian kelompok
-dan screenshot sendiri sebelum laporan final dikumpulkan.
-
-## Perbaikan dialog dan kesiapan hosting
-Dialog kini dipusatkan eksplisit dengan inset:0 dan margin:auto setelah reset
-Tailwind, dengan batas tinggi viewport dan scroll internal.
-Uji browser hasil dist/ lulus di 1440×900, 1920×1080, 390×844 dan 390×460.
-Build aset hosting berhasil. Deployment Vercel belum dijalankan pada akun pengguna.
+Validasi identik memeriksa pemulihan; pemeriksaan format bukan autentikasi
+kriptografis. Analisis frekuensi bukan pemecahan seluruh rangkaian.
+Isi hasil pengujian kelompok sendiri sebelum laporan final dikumpulkan.

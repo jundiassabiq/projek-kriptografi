@@ -1,14 +1,12 @@
 {
-  "name": "ruangcatat-mini",
+  "name": "ruangcatat-file",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Catatan konseling fiktif: JavaScript murni dan Tailwind lokal",
+  "description": "Web lokal dengan algoritma Python dan file tersandi",
   "scripts": {
     "build:css": "tailwindcss -i ./css/input.css -o ./css/style.css --minify",
-    "watch:css": "tailwindcss -i ./css/input.css -o ./css/style.css --watch",
-    "test": "node --test tests/*.test.js",
-    "build": "node scripts/build-site.js"
+    "watch:css": "tailwindcss -i ./css/input.css -o ./css/style.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.0",

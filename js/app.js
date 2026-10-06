@@ -1,104 +1,98 @@
-import {encrypt, decrypt} from './crypto/pipeline.js';
-import {loadNotes, addNote, removeNote, validateDate, StorageError} from './storage.js';
-import {$, message, readKeys, resetKeys, setupKeyToggle, renderNotes, showProcess, clearResult} from './ui.js';
+// JavaScript hanya antarmuka/file/HTTP. Seluruh algoritma dijalankan di Python.
+const $ = id => document.getElementById(id);
+const MAX_FILE_BYTES = 1024 * 1024;
+let busy = false;
 
-const NOTE_FORMAT = 'ruangcatat-mini-note-v1';
-let openingId = null;
-function today() {
-  const current = new Date(); current.setMinutes(current.getMinutes() - current.getTimezoneOffset());
-  return current.toISOString().slice(0, 10);
+function message(text, error = false) {
+  $('message').textContent = text;
+  $('message').setAttribute('role', error ? 'alert' : 'status');
+  $('message').className = error
+    ? 'rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800'
+    : 'rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800';
+  $('message').hidden = false;
 }
-function handleError(error) {
-  message(error.message, true);
-  if (error instanceof StorageError && ['corrupt', 'unavailable'].includes(error.code)) {
-    $('save-note').disabled = true;
+function keys() {
+  const values = {};
+  for (const input of document.querySelectorAll('[data-key]')) {
+    if (!/^[A-Za-z]+$/.test(input.value)) throw new Error('Ketiga kunci wajib huruf A–Z/a–z tanpa spasi atau angka.');
+    values[input.dataset.key] = input.value;
   }
+  return values;
 }
-function refresh() {
-  try {
-    renderNotes(loadNotes(), {open: openNote, remove: deleteNote}); $('save-note').disabled = false;
-  } catch (error) {
-    $('empty-list').textContent = 'Daftar tidak bisa dibaca. Data yang tersimpan tidak diubah.';
-    handleError(error);
-  }
+function setBusy(value) {
+  busy = value;
+  for (const element of $('note-form').querySelectorAll('input, textarea, button')) element.disabled = value;
+  $('decrypt').disabled = value || !$('cipher-file').files.length;
 }
-function findNote(id) {
-  const note = loadNotes().find(record => record.id === id);
-  if (!note) throw new Error('Catatan tidak ditemukan. Muat ulang daftar.');
-  return note;
+function clearOutput() {
+  $('result').hidden = true; $('result-code').textContent = ''; $('result-text').textContent = '';
+  $('frequency-body').replaceChildren(); $('frequency-table').hidden = true;
+  $('frequency-info').textContent = 'Hasil muncul setelah enkripsi atau dekripsi.';
+  $('analysis').open = false;
 }
-function openNote(id) {
-  try {
-    const note = findNote(id); clearResult();
-    $('open-form').reset(); resetKeys('open-keys', 'show-open-keys');
-    $('open-error').hidden = true; $('open-error').textContent = '';
-    openingId = id; $('open-meta').textContent = note.clientCode + ' · ' + note.sessionDate;
-    $('open-dialog').showModal();
-  } catch (error) { handleError(error); }
-}
-function deleteNote(id) {
-  try {
-    const note = findNote(id);
-    if (!window.confirm(`Hapus catatan ${note.clientCode} tanggal ${note.sessionDate}?`)) return;
-    removeNote(id); clearResult(); refresh(); message('Catatan dihapus.');
-  } catch (error) { handleError(error); }
-}
-$('note-form').addEventListener('submit', event => {
-  event.preventDefault(); $('save-note').disabled = true;
-  try {
-    const clientCode = $('client-code').value.trim(), sessionDate = $('session-date').value;
-    const notes = $('note-text').value;
-    if (!/^[A-Za-z0-9_-]{1,32}$/.test(clientCode)) throw new Error('Kode klien: 1–32 huruf/angka, tanda - atau _.');
-    if (!validateDate(sessionDate)) throw new Error('Tanggal sesi tidak valid.');
-    if (!notes.trim()) throw new Error('Isi catatan tidak boleh kosong.');
-    const keys = readKeys('create-keys');
-    // Penanda format turut dienkripsi; yang disimpan bukan JSON catatan terbuka.
-    const payload = JSON.stringify({format: NOTE_FORMAT, notes});
-    const result = encrypt(payload, keys), recovered = decrypt(result.text, keys).text;
-    if (recovered !== payload || JSON.parse(recovered).notes !== notes) {
-      throw new Error('Validasi dekripsi gagal. Catatan tidak disimpan.');
+function frequency(data) {
+  $('frequency-body').replaceChildren();
+  for (const item of data.rows) {
+    const row = document.createElement('tr'); row.className = 'border-b border-zinc-100';
+    for (const value of [item.letter, item.count, item.percent.toFixed(2) + '%']) {
+      const cell = document.createElement('td'); cell.className = 'py-2'; cell.textContent = value; row.append(cell);
     }
-    const current = Date.now();
-    const id = current.toString(36) + '_' + Math.random().toString(36).slice(2, 12);
-    addNote({id, clientCode, sessionDate, createdAt: current, ciphertext: result.text});
-    // Formulir baru dibersihkan setelah localStorage benar-benar berhasil ditulis.
-    $('note-form').reset(); $('session-date').value = today(); resetKeys('create-keys', 'show-create-keys');
-    clearResult(); showProcess(result, 'Enkripsi: Substitusi → Vigenère → Kolom. Penanda format ikut dienkripsi.');
-    refresh(); message('Validasi berhasil: hasil dekripsi identik. Catatan tersandi disimpan.');
-  } catch (error) { handleError(error); }
-  finally {
-    // Jangan mengaktifkan kembali tombol bila data tersimpan rusak/tidak dapat dibaca.
-    try { loadNotes(); $('save-note').disabled = false; } catch { $('save-note').disabled = true; }
+    $('frequency-body').append(row);
   }
-});
-$('open-form').addEventListener('submit', event => {
-  event.preventDefault();
+  $('frequency-info').textContent = 'Total huruf A–Z: ' + data.total;
+  $('frequency-table').hidden = false;
+}
+async function request(action, data) {
+  let response;
   try {
-    const note = findNote(openingId), keys = readKeys('open-keys');
-    const result = decrypt(note.ciphertext, keys);
-    let payload;
-    try {
-      payload = JSON.parse(result.text);
-      if (!payload || payload.format !== NOTE_FORMAT || Object.keys(payload).length !== 2 ||
-          typeof payload.notes !== 'string' || !payload.notes.trim()) throw new Error();
-    } catch { throw new Error('Kunci salah atau data rusak.'); }
-    $('result-meta').textContent = note.clientCode + ' · ' + note.sessionDate;
-    $('result-text').textContent = payload.notes; $('result-panel').hidden = false;
-    showProcess(result, 'Dekripsi: balik Kolom → balik Vigenère → balik Substitusi.');
-    $('open-dialog').close(); message('Catatan berhasil dibuka.');
-  } catch (error) {
-    $('open-error').textContent = error.message; $('open-error').hidden = false;
-    if (error instanceof StorageError) handleError(error);
+    response = await fetch('/api/' + action, {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data), signal: AbortSignal.timeout(30000)});
+  } catch { throw new Error('Server tidak dapat dihubungi. Jalankan python server.py lalu buka http://127.0.0.1:8000.'); }
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'Proses gagal.');
+  return result;
+}
+$('note-form').addEventListener('submit', async event => {
+  event.preventDefault(); if (busy) return; clearOutput();
+  try {
+    const code = $('client-code').value.trim(), text = $('note-text').value, values = keys();
+    if (!/^[A-Za-z0-9_-]{1,32}$/.test(code)) throw new Error('Kode klien: 1–32 huruf/angka, tanda - atau _.');
+    if (!text.trim()) throw new Error('Isi catatan tidak boleh kosong.');
+    setBusy(true);
+    const result = await request('encrypt', {code, text, keys: values});
+    if (!result.validated) throw new Error('Validasi gagal. File tidak diunduh.');
+    const blob = new Blob([JSON.stringify(result.package)], {type:'application/json;charset=utf-8'});
+    const url = URL.createObjectURL(blob), link = document.createElement('a');
+    link.href = url; link.download = result.filename; document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    frequency(result.frequency); message('Validasi berhasil: hasil dekripsi identik. Unduhan file telah dimulai.');
+  } catch (error) { message(error.message, true); }
+  finally { setBusy(false); }
+});
+$('cipher-file').addEventListener('change', () => {
+  clearOutput(); $('message').hidden = true;
+  const file = $('cipher-file').files[0];
+  if (file && file.size > MAX_FILE_BYTES) {
+    $('cipher-file').value = ''; message('Ukuran file maksimal 1 MB.', true);
   }
+  $('decrypt').disabled = !$('cipher-file').files.length;
 });
-$('cancel-open').addEventListener('click', () => $('open-dialog').close());
-$('open-dialog').addEventListener('close', () => {
-  $('open-form').reset(); resetKeys('open-keys', 'show-open-keys');
-  $('open-error').hidden = true; $('open-error').textContent = ''; openingId = null;
+$('decrypt').addEventListener('click', async () => {
+  if (busy) return; clearOutput();
+  try {
+    const values = keys(), file = $('cipher-file').files[0];
+    if (!file) throw new Error('Pilih file tersandi terlebih dahulu.');
+    if (file.size > MAX_FILE_BYTES) throw new Error('Ukuran file maksimal 1 MB.');
+    setBusy(true);
+    let packageData;
+    try { packageData = JSON.parse(await file.text()); }
+    catch { throw new Error('File JSON rusak atau tidak valid.'); }
+    const result = await request('decrypt', {package: packageData, keys: values});
+    $('result-code').textContent = result.code; $('result-text').textContent = result.text; $('result').hidden = false;
+    frequency(result.frequency); message('Catatan berhasil didekripsi.');
+  } catch (error) { message(error.message, true); }
+  finally { setBusy(false); }
 });
-$('close-result').addEventListener('click', clearResult);
-setupKeyToggle('create-keys', 'show-create-keys'); setupKeyToggle('open-keys', 'show-open-keys');
-$('session-date').value = today(); refresh();
-window.addEventListener('storage', event => {
-  if (event.key === 'ruangcatat-mini:v1' || event.key === null) { clearResult(); refresh(); }
+$('clear').addEventListener('click', () => {
+  $('note-form').reset(); clearOutput(); $('message').hidden = true; $('message').textContent = '';
+  $('decrypt').disabled = true;
 });

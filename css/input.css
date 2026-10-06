@@ -15,13 +15,3 @@
   .secondary { @apply inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2; }
   .card { @apply overflow-hidden rounded-xl border border-zinc-200 bg-white; }
 }
-dialog::backdrop { background: rgb(0 0 0 / .3); }
-
-/* Preflight menghapus margin bawaan dialog; pulihkan pemusatan modal secara eksplisit. */
-#open-dialog {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  max-height: calc(100dvh - 2rem);
-  overflow-y: auto;
-}

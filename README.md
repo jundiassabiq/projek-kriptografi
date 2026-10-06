@@ -1,98 +1,130 @@
-# RuangCatat Mini
-
-Prototipe tugas kriptografi klasik untuk catatan konseling **fiktif**. Satu halaman
-HTML, JavaScript vanilla modular, dan Tailwind yang sudah dikompilasi lokal.
-Tidak memerlukan backend, database aktif, atau koneksi internet saat digunakan.
+# RuangCatat File
+Web lokal satu halaman untuk catatan konseling fiktif. Semua algoritma ditulis
+sendiri dalam Python. HTML, JavaScript vanilla, dan CSS Tailwind lokal hanya
+menangani tampilan. Tidak memakai database, localStorage, framework backend,
+atau library kriptografi.
 
 ## Menjalankan
-1. Buka folder proyek ini di VS Code.
-2. Pastikan ekstensi **Live Server** tersedia.
-3. Klik kanan **index.html**, pilih **Open with Live Server**.
-4. Gunakan alamat localhost/127.0.0.1 yang dibuka ekstensi.
+Pasang Python 3.10 atau lebih baru, lalu buka terminal di folder proyek:
 
-Jangan membuka HTML melalui file:// karena proyek menggunakan modul JavaScript.
-Tidak perlu menjalankan npm, Python, atau proses build bersamaan dengan aplikasi.
+    cd C:\Users\Junid\Documents\project-kriptografi
+    python server.py
 
-## Menggunakan
-1. Isi kode samaran (1–32 huruf/angka, - atau _), tanggal, dan isi catatan.
-2. Masukkan tiga kunci kata, hanya A–Z/a–z. Contoh demonstrasi: ZEBRAS, LEMON,
-   BALLOON. Kunci diproses tanpa membedakan besar/kecil.
-3. Klik **Enkripsi & simpan**. Program mengenkripsi, mendekripsi kembali, dan
-   membandingkan teks secara persis sebelum menyimpan.
-4. **Detail proses algoritma** dapat dilipat untuk melihat hasil tiga tahap.
-5. Klik **Buka**, masukkan kembali ketiga kunci, lalu dekripsi.
-6. **Tutup** membersihkan hasil dekripsi dari tampilan; **Hapus** meminta konfirmasi.
+Buka http://127.0.0.1:8000 di browser. Biarkan terminal menyala selama memakai
+aplikasi. Ctrl+C menghentikan server. Jika Windows memakai Python Launcher,
+gunakan py server.py. Jika port 8000 dipakai, hentikan server sebelumnya dahulu.
 
-Simpan ketiga kunci sendiri; program tidak menyimpannya dan tidak menyediakan
-pemulihan kunci. Setelah berhasil menyimpan/membuka atau menutup dialog, input
-kunci dibersihkan. Penyimpanan gagal mempertahankan formulir agar dapat dicoba ulang.
+Tidak perlu pip install, npm, Live Server, atau internet untuk memakai aplikasi.
+Jangan membuka index.html lewat file://. Versi ini khusus server Python lokal.
 
-## Algoritma
-Urutan: Substitusi Monoalfabetik → Vigenère → Transposisi Kolom.
-Dekripsi membalik urutan tersebut. Seluruh algoritma ditulis sendiri memakai
-sintaks JavaScript. Import hanya menghubungkan modul lokal buatan proyek.
-Tidak menggunakan library kriptografi, Web Crypto, atau API.
+## Mengenkripsi
+1. Isi kode samaran (1–32 huruf/angka, - atau _) dan isi catatan fiktif.
+2. Isi kunci Monoalfabetik, Vigenère, dan Kolom dengan kata A–Z/a–z.
+   Contoh untuk demonstrasi: ZEBRAS, LEMON, BALLOON.
+3. Klik Enkripsi & unduh.
+4. Server mendekripsi balik dan membandingkan isi secara persis.
+5. Jika berhasil, browser mulai mengunduh file KODE.json.
+   Browser mungkin meminta lokasi atau izin unduhan; periksa folder Downloads.
 
-Substitusi membentuk alfabet dari kata kunci unik ditambah alfabet tersisa.
-Vigenère menggeser A–Z/a–z; karakter lain tidak menghabiskan posisi kunci.
-Transposisi mengurutkan kolom menurut huruf kunci, lalu indeks asal untuk huruf
-berulang, tanpa padding. Array.from menjaga karakter Unicode seperti emoji.
-Huruf besar/kecil, spasi, tanda baca, angka, Unicode dan baris baru dipulihkan identik.
+Kunci tidak ada pada file. Catat/ingat ketiganya sendiri. Kunci tetap di formulir
+supaya dapat digunakan untuk mencoba dekripsi. Bersihkan menghapus semua input.
 
-## Penyimpanan dan batasan
-localStorage memakai nama ruangcatat-mini:v1 dengan format:
-version, notes; setiap record berisi id, clientCode, sessionDate, createdAt,
-ciphertext. Isi catatan dibungkus JSON dengan penanda ruangcatat-mini-note-v1
-lalu dienkripsi. Kunci dan salinan plainteks tidak disimpan.
+## Membuka file
+1. Klik Bersihkan bila perlu, pilih file .json tersandi (maksimal 1 MB).
+2. Masukkan ketiga kunci yang sama pada formulir.
+3. Klik Dekripsi. Kode klien dan teks muncul di Hasil dekripsi.
+Kode klien/isi formulir tidak diperlukan untuk proses dekripsi.
+File asli tidak diubah. Salah kunci/data rusak tidak membuka hasil.
+File browser versi Mini sebelumnya tidak kompatibel dan tidak dimigrasikan.
 
-Kode klien, tanggal, ID dan waktu penambahan tetap terbuka. Plainteks muncul di
-memori/tampilan saat dibuka, termasuk tahap akhir Detail proses. Pemeriksaan
-format bukan autentikasi kriptografis; kombinasi klasik ini tidak layak untuk
-catatan konseling asli. Validasi identik membuktikan pemulihan teks saja.
+Analisis frekuensi dapat dilipat. Tabel memuat 26 huruf, jumlah, persentase,
+diurutkan paling sering kemudian alfabet. Persentase hanya memakai total A–Z;
+angka dan karakter lain diabaikan. Ini analisis pola, bukan pemecahan tiga lapis.
 
-Data hanya ada pada browser dan origin yang sama. Mengubah browser, host
-(localhost vs 127.0.0.1), port atau profil dapat menghasilkan daftar berbeda.
-Menghapus data browser menghapus catatan. Mode privat dapat membuang data saat
-ditutup. Data rusak tidak ditimpa; tombol simpan dinonaktifkan dengan pesan.
-Daftar diurutkan menurut waktu penambahan terbaru.
+## Alur yang dapat dijelaskan
+1. Bungkus kode dan catatan sebagai JSON dengan penanda format.
+2. Encode JSON menjadi UTF-8, lalu hex huruf besar. Contoh: A → 41.
+   Encoding adalah representasi data, bukan algoritma enkripsi keempat.
+3. Enkripsi: Monoalfabetik → Vigenère → Transposisi Kolom.
+4. Dekripsi: balik Kolom → balik Vigenère → balik Monoalfabetik.
+5. Decode hex → UTF-8 → JSON, lalu periksa format catatan.
 
-Database lama di data-lama/ hanya arsip, tanpa migrasi. Aplikasi tidak membacanya.
+Konversi UTF-8 membuat teks Arab, Mandarin, Yunani, Rusia, aksara lain dan emoji
+dapat dipulihkan identik. Algoritma klasik tetap bekerja pada representasi Latin/
+angka, bukan memakai tabel alfabet setiap bahasa. Monoalfabetik/Vigenère hanya
+mengubah A–Z/a–z. Kolom mengubah posisi seluruh karakter tanpa padding.
 
-## Struktur
-- index.html: antarmuka satu halaman.
-- css/input.css: sumber Tailwind dan komponen sederhana.
-- css/style.css: CSS lokal siap pakai.
-- js/app.js: alur formulir, enkripsi, validasi dan pembukaan.
-- js/ui.js: interaksi dan rendering aman menggunakan textContent.
-- js/storage.js: validasi format dan akses localStorage.
-- js/crypto/: monoalphabetic.js, vigenere.js, columnar.js, pipeline.js.
-- tests/: pengujian algoritma dan penyimpanan.
-- docs/: draf laporan, hasil uji dan screenshot aplikasi.
-- data-lama/: arsip SQLite versi sebelumnya, diabaikan Git.
+Monoalfabetik memakai huruf unik kata kunci diikuti alfabet yang belum muncul.
+Vigenère memakai (P+K) mod 26 dan (C-K) mod 26. Non-Latin tidak menghabiskan kunci
+pada modul dasar. Kolom diurutkan menurut huruf kunci dan posisi asal untuk huruf
+berulang. Dekripsi menghitung panjang kolom termasuk baris tidak penuh.
+Komentar tiap modul menjelaskan logikanya.
 
-## Pengembangan opsional
-Node.js 20+ dan npm hanya diperlukan untuk pengujian atau membangun ulang CSS.
+## Struktur modular
+    server.py             HTTP lokal dan penyajian file web
+    notes.py              Validasi, format file, encoding dan round-trip
+    crypto/
+      keys.py             Validasi kunci
+      monoalphabetic.py   Substitusi
+      vigenere.py         Pergeseran berulang
+      columnar.py         Pengacakan kolom
+      pipeline.py         Rangkaian/invers tiga algoritma
+      frequency.py        Analisis frekuensi
+    index.html            Satu halaman
+    js/app.js             Formulir, fetch, unggah/unduh, hasil
+    css/input.css         Sumber Tailwind
+    css/style.css         CSS lokal siap pakai
+    tests/                unittest Python
+    docs/                 Laporan, hasil uji dan screenshot
+    data-lama/            Arsip SQLite lama; tidak digunakan
+
+Setiap modul algoritma menyediakan encrypt(text, key) dan decrypt(text, key).
+Import algoritma hanya ke modul buatan proyek. Pustaka standar json, re,
+http.server dan pathlib dipakai untuk aplikasi, bukan implementasi kriptografi.
+
+## Format dan endpoint
+File unduhan hanya:
+    {"format":"ruangcatat-file-v2","ciphertext":"..."}
+
+POST /api/encrypt:
+    {"code":"K-001","text":"Catatan fiktif","keys":{"mono":"ZEBRAS","vigenere":"LEMON","columnar":"BALLOON"}}
+Mengembalikan package, filename, validated dan frequency.
+
+POST /api/decrypt:
+    {"package":{...},"keys":{...}}
+Mengembalikan code, text dan frequency.
+
+Keduanya application/json. Gagal: status 400 + error; permintaan terlalu besar:
+413. Batas request HTTP 2 MB, file cipherteks 1 MB. Isi panjang dapat ditolak
+karena hex membuat representasi sekitar dua kali panjang byte UTF-8.
+Server hanya menyajikan HTML/CSS/JS aplikasi; source Python dan arsip tidak
+tersedia melalui HTTP. Tidak menulis plaintext atau kunci ke disk/log.
+Browser dan server tetap memegang data dalam memori saat pemrosesan.
+
+## Empat nilai tambahan
+| Fitur | Implementasi |
+|---|---|
+| GUI | Web responsif satu halaman |
+| Kriptanalisis sederhana | Analisis frekuensi huruf cipherteks |
+| Multibahasa | Encoding UTF-8 dan pemulihan Unicode identik |
+| Baca/tulis cipherteks ke file | Pilih file JSON dan unduh hasil |
+
+Tetap pastikan interpretasi nilai tambahan serta keunikan kombinasi pada dosen.
+Kombinasi klasik untuk pembelajaran, bukan catatan konseling asli. Validasi
+identik dan penanda format tidak memberikan autentikasi atau keamanan modern.
+Unduhan, arsip dan kunci dikelola pengguna. Tidak ada pemulihan kunci/sinkronisasi.
+Data browser lama tidak dihapus otomatis; data-lama tetap dipertahankan.
+
+## Tes dan perubahan CSS
+    python -m unittest discover -s tests -v
+
+Hasil: 26 tes Python dan pengujian browser lulus. Rincian di
+docs/HASIL_PENGUJIAN.md. npm hanya untuk developer yang ingin mengubah Tailwind:
 
     npm ci
-    npm test
     npm run build:css
 
-CSS hasil build disertakan, sehingga pemakaian biasa tetap offline.
-Tailwind hanya dependensi pengembangan; @parcel/watcher dioverride ke 2.6.0
-untuk memakai dependensi yang sudah diperbaiki. Lockfile disertakan.
-Referensi CLI: https://tailwindcss.com/docs/installation/tailwind-cli
-
-## Penugasan
-Tiga algoritma mencakup substitusi monoalfabetik, substitusi polialfabetik,
-dan transposisi. Input teks, tiga kunci, enkripsi, dekripsi, dan validasi identik
-tersedia. Komentar algoritma dan laporan ada dalam proyek.
-Pastikan kombinasi belum dipakai kelompok lain di kelas. Isi nama/NIM,
-kontribusi aktual, dan identitas mata kuliah pada docs/LAPORAN_DRAF.md.
-Kumpulkan source code dan laporan; node_modules dan arsip database tidak perlu
-disertakan. Sesuaikan laporan dengan pengujian kelompok sendiri.
-
-## Hosting Vercel
-Konfigurasi tersedia di vercel.json; panduan lengkap: docs/HOSTING_VERCEL.md.
-Build hosting memakai npm run build untuk menyalin aset web ke dist/, tanpa
-mengubah cara penggunaan Live Server. CSS tetap dibangun terpisah melalui
-npm run build:css bila tampilan diubah. Arsip database tidak ikut dipublikasikan.
+CSS hasil build sudah disertakan. Tidak ada paket Python tambahan.
+Draf laporan ada di docs/LAPORAN_DRAF.md; isi identitas dan kontribusi anggota
+sebenarnya. Kumpulkan source dan laporan; abaikan node_modules, cache Python,
+dan database arsip. Referensi Tailwind: https://tailwindcss.com/docs/installation/tailwind-cli
