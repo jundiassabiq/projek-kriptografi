@@ -38,3 +38,11 @@ Sumber Tailwind dan aturan tampilan aplikasi. File ini dikompilasi melalui npm r
     @apply overflow-hidden rounded-xl border border-zinc-200 bg-white;
   }
 }
+
+@layer components {
+  .drop-zone {
+    @apply cursor-pointer rounded-lg border border-dashed border-zinc-300 bg-zinc-50 p-5 text-center outline-none hover:border-zinc-500 focus-visible:ring-2 focus-visible:ring-zinc-400;
+  }
+  .drop-zone.drag-active { @apply border-zinc-900 bg-zinc-100; }
+  .drop-zone[aria-disabled="true"] { cursor: not-allowed; opacity: .45; }
+}

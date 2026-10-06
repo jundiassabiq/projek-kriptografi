@@ -11,7 +11,8 @@ from notes import encrypt_note, decrypt_note, MAX_FILE_BYTES
 ROOT = Path(__file__).resolve().parent
 MAX_REQUEST_BYTES = 2 * MAX_FILE_BYTES
 STATIC = {'/': ('index.html', 'text/html'), '/index.html': ('index.html', 'text/html'),
-          '/css/style.css': ('css/style.css', 'text/css'), '/js/app.js': ('js/app.js', 'text/javascript')}
+          '/css/style.css': ('css/style.css', 'text/css'), '/js/app.js': ('js/app.js', 'text/javascript'),
+          '/js/files.js': ('js/files.js', 'text/javascript')}
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):

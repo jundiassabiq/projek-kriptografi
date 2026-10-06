@@ -3,9 +3,12 @@ Mengatur interaksi halaman: membaca formulir dan kunci, mengirim permintaan ke P
 */
 
 
+import {validateFile, readPlaintext, connectDropZone} from './files.js';
+
 const $ = id => document.getElementById(id);
 const MAX_FILE_BYTES = 1024 * 1024;
 let busy = false;
+let cipherFile = null;
 
 function message(text, error = false) {
   $('message').textContent = text;
@@ -26,7 +29,10 @@ function keys() {
 function setBusy(value) {
   busy = value;
   for (const element of $('note-form').querySelectorAll('input, textarea, button')) element.disabled = value;
-  $('decrypt').disabled = value || !$('cipher-file').files.length;
+  $('decrypt').disabled = value || !cipherFile;
+  for (const id of ['plain-drop', 'cipher-drop']) {
+    $(id).setAttribute('aria-disabled', String(value)); $(id).tabIndex = value ? -1 : 0;
+  }
 }
 function clearOutput() {
   $('encryption-result').hidden = true; $('encryption-code').textContent = '';
@@ -79,18 +85,41 @@ $('note-form').addEventListener('submit', async event => {
   } catch (error) { message(error.message, true); }
   finally { setBusy(false); }
 });
-$('cipher-file').addEventListener('change', () => {
-  clearOutput(); $('message').hidden = true;
-  const file = $('cipher-file').files[0];
-  if (file && file.size > MAX_FILE_BYTES) {
-    $('cipher-file').value = ''; message('Ukuran file maksimal 1 MB.', true);
-  }
-  $('decrypt').disabled = !$('cipher-file').files.length;
-});
+async function selectPlaintext(files) {
+  if (busy) return;
+  try {
+    const file = validateFile(files, '.txt', 500 * 1024);
+    setBusy(true);
+    const text = await readPlaintext(file);
+    if ($('note-text').value && $('note-text').value !== text && !window.confirm('Ganti isi catatan yang sekarang dengan isi file ' + file.name + '?')) return;
+    $('note-text').value = text; clearOutput();
+    $('plain-file-name').textContent = 'Catatan diambil dari: ' + file.name;
+    message('Isi file .txt dimuat. Periksa catatan, isi kode dan tiga kunci, lalu klik Enkripsi & unduh.');
+  } catch (error) { message(error.message, true); }
+  finally { setBusy(false); }
+}
+function selectCiphertext(files) {
+  if (busy) return;
+  try {
+    const file = validateFile(files, '.json', MAX_FILE_BYTES);
+    cipherFile = file; clearOutput();
+    $('cipher-file-name').textContent = 'File dipilih: ' + file.name;
+    $('decrypt').disabled = false;
+    message('File tersandi dipilih. Masukkan tiga kunci, lalu klik Dekripsi.');
+  } catch (error) { message(error.message, true); }
+}
+connectDropZone($('plain-drop'), $('plain-file'), selectPlaintext, () => busy);
+connectDropZone($('cipher-drop'), $('cipher-file'), selectCiphertext, () => busy);
+// Mencegah browser membuka file ketika dijatuhkan di luar kedua area.
+for (const name of ['dragover', 'drop']) {
+  document.addEventListener(name, event => {
+    if (event.dataTransfer?.types.includes('Files')) event.preventDefault();
+  });
+}
 $('decrypt').addEventListener('click', async () => {
   if (busy) return; clearOutput();
   try {
-    const values = keys(), file = $('cipher-file').files[0];
+    const values = keys(), file = cipherFile;
     if (!file) throw new Error('Pilih file tersandi terlebih dahulu.');
     if (file.size > MAX_FILE_BYTES) throw new Error('Ukuran file maksimal 1 MB.');
     setBusy(true);
@@ -105,6 +134,10 @@ $('decrypt').addEventListener('click', async () => {
 });
 $('clear').addEventListener('click', () => {
   $('note-form').reset(); toggleKeys(); clearOutput(); $('message').hidden = true; $('message').textContent = '';
+  cipherFile = null;
+  $('plain-file-name').textContent = 'Opsional: isi file akan masuk ke kolom catatan dan bisa diedit.';
+  $('cipher-file-name').textContent = 'Belum ada file tersandi dipilih.';
+  for (const id of ['plain-drop', 'cipher-drop']) $(id).classList.remove('drag-active');
   $('decrypt').disabled = true;
 });
 
