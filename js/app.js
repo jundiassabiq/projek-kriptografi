@@ -46,7 +46,7 @@ async function request(action, data) {
   let response;
   try {
     response = await fetch('/api/' + action, {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data), signal: AbortSignal.timeout(30000)});
-  } catch { throw new Error('Server tidak dapat dihubungi. Jalankan python server.py lalu buka http://127.0.0.1:8000.'); }
+  } catch { throw new Error('Server tidak dapat dihubungi. Periksa koneksi, atau jalankan python server.py untuk versi lokal.'); }
   const result = await response.json();
   if (!response.ok) throw new Error(result.error || 'Proses gagal.');
   return result;
@@ -93,6 +93,14 @@ $('decrypt').addEventListener('click', async () => {
   finally { setBusy(false); }
 });
 $('clear').addEventListener('click', () => {
-  $('note-form').reset(); clearOutput(); $('message').hidden = true; $('message').textContent = '';
+  $('note-form').reset(); toggleKeys(); clearOutput(); $('message').hidden = true; $('message').textContent = '';
   $('decrypt').disabled = true;
 });
+
+function toggleKeys() {
+  for (const input of document.querySelectorAll('[data-key]')) {
+    input.type = $('show-keys').checked ? 'text' : 'password';
+  }
+}
+$('show-keys').addEventListener('change', toggleKeys);
+

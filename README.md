@@ -15,7 +15,7 @@ aplikasi. Ctrl+C menghentikan server. Jika Windows memakai Python Launcher,
 gunakan py server.py. Jika port 8000 dipakai, hentikan server sebelumnya dahulu.
 
 Tidak perlu pip install, npm, Live Server, atau internet untuk memakai aplikasi.
-Jangan membuka index.html lewat file://. Versi ini khusus server Python lokal.
+Jangan membuka index.html lewat file://. Versi lokal memakai server Python; deployment opsional Vercel juga disiapkan.
 
 ## Mengenkripsi
 1. Isi kode samaran (1–32 huruf/angka, - atau _) dan isi catatan fiktif.
@@ -128,3 +128,8 @@ CSS hasil build sudah disertakan. Tidak ada paket Python tambahan.
 Draf laporan ada di docs/LAPORAN_DRAF.md; isi identitas dan kontribusi anggota
 sebenarnya. Kumpulkan source dan laporan; abaikan node_modules, cache Python,
 dan database arsip. Referensi Tailwind: https://tailwindcss.com/docs/installation/tailwind-cli
+
+## Hosting dan berbagi
+Panduan: docs/HOSTING_VERCEL.md. Vercel memakai api/encrypt.py dan api/decrypt.py.
+npm run build menyiapkan aset public/; algoritma tetap Python. Deploy lewat npx vercel --prod.
+

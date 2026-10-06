@@ -4,10 +4,12 @@
 **RuangCatat File: Web Lokal Catatan Konseling dengan Substitusi Monoalfabetik,
 Vigenère, dan Transposisi Kolom**
 
-Mata kuliah: Kriptografi (IF21A05)  
-Kelas / dosen: [isi]  
-Anggota / NIM: [isi, maksimal 5 anggota]  
-Institusi / tahun: [isi]
+Mata kuliah: Kriptografi  
+Kelas: A
+dosen: Puteri Awaliatush Shofro, M.Kom.
+Anggota / NIM:  
+  1. Irsyad Palupi
+Institusi / tahun: 2026
 
 ## Deskripsi singkat program
 RuangCatat File memproses catatan konseling fiktif menggunakan kode samaran.

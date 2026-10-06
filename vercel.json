@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "node scripts/build-site.js",
+  "installCommand": "",
+  "outputDirectory": "public",
+  "functions": {
+    "api/*.py": {
+      "excludeFiles": "{data-lama/**,docs/**,tests/**,node_modules/**,**/__pycache__/**}"
+    }
+  }
+}

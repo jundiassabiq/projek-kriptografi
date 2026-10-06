@@ -1,0 +1,7 @@
+.git
+node_modules
+data-lama
+docs
+tests
+public
+**/__pycache__

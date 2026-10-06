@@ -6,7 +6,8 @@
   "description": "Web lokal dengan algoritma Python dan file tersandi",
   "scripts": {
     "build:css": "tailwindcss -i ./css/input.css -o ./css/style.css --minify",
-    "watch:css": "tailwindcss -i ./css/input.css -o ./css/style.css --watch"
+    "watch:css": "tailwindcss -i ./css/input.css -o ./css/style.css --watch",
+    "build": "node scripts/build-site.js"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.0",

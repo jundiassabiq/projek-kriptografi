@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 data-lama/
 .DS_Store
+public/
+.vercel/
+.vercel
