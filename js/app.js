@@ -29,6 +29,8 @@ function setBusy(value) {
   $('decrypt').disabled = value || !$('cipher-file').files.length;
 }
 function clearOutput() {
+  $('encryption-result').hidden = true; $('encryption-code').textContent = '';
+  $('plaintext-preview').textContent = ''; $('ciphertext-preview').textContent = '';
   $('result').hidden = true; $('result-code').textContent = ''; $('result-text').textContent = '';
   $('frequency-body').replaceChildren(); $('frequency-table').hidden = true;
   $('frequency-info').textContent = 'Hasil muncul setelah enkripsi atau dekripsi.';
@@ -64,6 +66,11 @@ $('note-form').addEventListener('submit', async event => {
     setBusy(true);
     const result = await request('encrypt', {code, text, keys: values});
     if (!result.validated) throw new Error('Validasi gagal. File tidak diunduh.');
+    // Snapshot input dan hasil Python ditampilkan sebagai teks, bukan HTML.
+    $('encryption-code').textContent = 'Kode klien: ' + code;
+    $('plaintext-preview').textContent = text;
+    $('ciphertext-preview').textContent = result.package.ciphertext;
+    $('encryption-result').hidden = false;
     const blob = new Blob([JSON.stringify(result.package)], {type:'application/json;charset=utf-8'});
     const url = URL.createObjectURL(blob), link = document.createElement('a');
     link.href = url; link.download = result.filename; document.body.append(link); link.click(); link.remove();

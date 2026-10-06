@@ -118,6 +118,23 @@ Menampilkan halaman RuangCatat: formulir catatan dan kunci, unggah file, hasil d
           </p>
         </form>
       </section>
+      <section id="encryption-result" class="card" hidden aria-labelledby="encryption-title">
+        <div class="border-b border-zinc-200 p-5">
+          <h2 id="encryption-title" class="text-sm font-semibold">Perbandingan hasil enkripsi</h2>
+          <p id="encryption-code" class="mt-1 text-xs text-zinc-500"></p>
+        </div>
+        <div class="grid gap-4 p-5 sm:grid-cols-2">
+          <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <h3 class="mb-3 text-xs font-semibold">Plainteks · catatan asli</h3>
+            <pre id="plaintext-preview" class="max-h-64 overflow-auto whitespace-pre-wrap break-all text-sm leading-relaxed"></pre>
+          </div>
+          <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <h3 class="mb-3 text-xs font-semibold">Cipherteks · hasil tiga algoritma</h3>
+            <pre id="ciphertext-preview" class="max-h-64 overflow-auto whitespace-pre-wrap break-all text-sm leading-relaxed"></pre>
+          </div>
+        </div>
+        <p class="px-5 pb-5 text-xs leading-relaxed text-zinc-500">Kode dan catatan dibungkus menjadi JSON sebelum dienkripsi. Cipherteks ini sama dengan isi cipherteks pada file unduhan.</p>
+      </section>
       <section id="result" class="card" hidden>
         <div class="border-b border-zinc-200 p-5">
           <h2 class="text-sm font-semibold">Hasil dekripsi</h2>
