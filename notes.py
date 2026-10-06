@@ -4,7 +4,7 @@ import re
 from crypto import pipeline, frequency
 from crypto.keys import validate
 
-FORMAT = 'ruangcatat-file-v2'
+FORMAT = 'ruangcatat-file-v3'
 MAX_FILE_BYTES = 1024 * 1024
 KEY_NAMES = {'mono', 'vigenere', 'columnar'}
 
@@ -25,21 +25,19 @@ def file_text(package):
 
 def validate_package(package):
     if not isinstance(package, dict) or set(package) != {'format', 'ciphertext'} or package['format'] != FORMAT:
-        raise ValueError('Format file tidak didukung. Pilih file RuangCatat File v2.')
+        raise ValueError('Format file tidak didukung. Gunakan file v3; file v2 memakai encoding lama.')
     cipher = package['ciphertext']
-    if not isinstance(cipher, str) or not cipher or any(c not in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' for c in cipher):
+    if not isinstance(cipher, str) or not cipher:
         raise ValueError('Kunci salah atau data rusak')
+    # Byte UTF-8 hanya untuk ukuran file/HTTP, tidak sebagai tahap algoritma.
     if len(file_text(package).encode('utf-8')) > MAX_FILE_BYTES:
         raise ValueError('Ukuran file maksimal 1 MB.')
 
 def unpack(package, keys):
     validate_package(package)
     try:
-        hex_text = pipeline.decrypt(package['ciphertext'], keys)
-        # fromhex menerima spasi, maka pastikan hasil benar-benar hex kapital genap.
-        if len(hex_text) % 2 or any(c not in '0123456789ABCDEF' for c in hex_text):
-            raise ValueError()
-        payload = json.loads(bytes.fromhex(hex_text).decode('utf-8'))
+        text = pipeline.decrypt(package['ciphertext'], keys)
+        payload = json.loads(text)
         if not isinstance(payload, dict) or set(payload) != {'format', 'code', 'text'} or payload['format'] != FORMAT:
             raise ValueError()
         validate_note(payload['code'], payload['text'])
@@ -51,12 +49,13 @@ def encrypt_note(code, text, keys):
     validate_keys(keys)
     validate_note(code, text)
     payload = {'format': FORMAT, 'code': code, 'text': text}
-    # Encoding adalah persiapan data Unicode, bukan algoritma kriptografi keempat.
-    encoded = json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode('utf-8').hex().upper()
-    # Tiga algoritma mempertahankan panjang hex. Tolak sebelum memproses file besar.
-    if len(encoded) + len(file_text({'format': FORMAT, 'ciphertext': ''})) > MAX_FILE_BYTES:
+    # JSON langsung masuk tiga algoritma; tidak ada konversi hex atau byte.
+    plain = file_text(payload)
+    if len(plain.encode('utf-8')) > MAX_FILE_BYTES:
         raise ValueError('Catatan terlalu panjang. Hasil file maksimal 1 MB.')
-    package = {'format': FORMAT, 'ciphertext': pipeline.encrypt(encoded, keys)}
+    package = {'format': FORMAT, 'ciphertext': pipeline.encrypt(plain, keys)}
+    # Kutip/backslash pada cipherteks perlu escape di JSON file; ukur paket final.
+    validate_package(package)
     if unpack(package, keys) != payload:
         raise ValueError('Validasi gagal. File tidak dibuat.')
     return {'package': package, 'filename': code + '.json', 'validated': True,

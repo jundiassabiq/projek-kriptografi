@@ -68,7 +68,7 @@ class AlgorithmTests(unittest.TestCase):
         self.assertTrue(all(row['percent'] == 0 for row in result['rows']))
 
 class NoteTests(unittest.TestCase):
-    def test_multilanguage_exact_file_roundtrip(self):
+    def test_text_format_file_roundtrip(self):
         text = 'Catatan fiktif\r\nالعربية 中文 Ελληνικά Русский 🙂 café\n  akhir  '
         result = encrypt_note('K-001', text, KEYS)
         package = json.loads(json.dumps(result['package']))
@@ -107,7 +107,7 @@ class NoteTests(unittest.TestCase):
                 with self.assertRaises(ValueError): decrypt_note(value, KEYS)
 
     def test_format_marker_required(self):
-        encoded = json.dumps({'format': 'wrong', 'code': 'K', 'text': 'fiktif'}).encode().hex().upper()
+        encoded = json.dumps({'format': 'wrong', 'code': 'K', 'text': 'fiktif'})
         package = {'format': FORMAT, 'ciphertext': pipeline.encrypt(encoded, KEYS)}
         with self.assertRaisesRegex(ValueError, 'Kunci salah atau data rusak'): decrypt_note(package, KEYS)
 
@@ -123,13 +123,23 @@ class NoteTests(unittest.TestCase):
             decrypt_note({'format': FORMAT, 'ciphertext': 'A' * MAX_FILE_BYTES}, KEYS)
 
     def test_boundary_output(self):
-        # Tentukan teks ASCII terbesar yang masih menghasilkan paket <=1 MB.
-        overhead = len(json.dumps({'format': FORMAT, 'code': 'K', 'text': ''}, separators=(',', ':')).encode()) * 2
-        package_overhead = len(json.dumps({'format': FORMAT, 'ciphertext': ''}, separators=(',', ':')))
-        size = (MAX_FILE_BYTES - overhead - package_overhead) // 2
+        # Angka ukuran mencakup escape JSON final, bukan hanya panjang teks.
+        package = encrypt_note('K', 'x', KEYS)['package']
+        overhead = len(json.dumps(package, ensure_ascii=False, separators=(',', ':')).encode('utf-8')) - 1
+        size = MAX_FILE_BYTES - overhead
         output = encrypt_note('K', 'x' * size, KEYS)
-        self.assertLessEqual(len(json.dumps(output['package'], separators=(',', ':')).encode()), MAX_FILE_BYTES)
+        self.assertEqual(len(json.dumps(output['package'], separators=(',', ':')).encode()), MAX_FILE_BYTES)
         with self.assertRaisesRegex(ValueError, '1 MB'): encrypt_note('K', 'x' * (size + 1), KEYS)
+
+    def test_direct_pipeline_without_hex(self):
+        keys = {'mono': 'mura', 'vigenere': 'cinta', 'columnar': 'mufik'}
+        plain = json.dumps({'format': FORMAT, 'code': 'K-110', 'text': 'Kipeli'}, ensure_ascii=False, separators=(',', ':'))
+        result = encrypt_note('K-110', 'Kipeli', keys)
+        self.assertEqual(result['package']['ciphertext'], pipeline.encrypt(plain, keys))
+        self.assertEqual(decrypt_note(result['package'], keys)['text'], 'Kipeli')
+        with self.assertRaisesRegex(ValueError, 'encoding lama'):
+            decrypt_note({'format': 'ruangcatat-file-v2', 'ciphertext': 'ABC123'}, keys)
 
 if __name__ == '__main__':
     unittest.main()
+
