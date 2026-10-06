@@ -1,4 +1,8 @@
-// JavaScript hanya antarmuka/file/HTTP. Seluruh algoritma dijalankan di Python.
+/*
+Mengatur interaksi halaman: membaca formulir dan kunci, mengirim permintaan ke Python, menangani unggah/unduh file, serta menampilkan hasil dan frekuensi. Algoritma tidak dijalankan di file ini.
+*/
+
+
 const $ = id => document.getElementById(id);
 const MAX_FILE_BYTES = 1024 * 1024;
 let busy = false;

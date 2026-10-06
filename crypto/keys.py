@@ -1,3 +1,8 @@
+"""
+Memeriksa agar kunci hanya berisi huruf A–Z/a–z, lalu mengubahnya menjadi huruf besar untuk dipakai oleh algoritma.
+"""
+
+
 def validate(key):
     """Kunci klasik hanya memakai huruf Latin, tanpa spasi atau angka."""
     if not isinstance(key, str) or not key or any(not ('A' <= c <= 'Z' or 'a' <= c <= 'z') for c in key):

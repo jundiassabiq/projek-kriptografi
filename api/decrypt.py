@@ -1,4 +1,8 @@
-"""Penghubung Vercel; logika HTTP dan algoritma tetap di modul aplikasi."""
+"""
+Menyediakan endpoint /api/decrypt pada Vercel. Permintaan POST diteruskan ke handler aplikasi yang memanggil proses dekripsi Python.
+"""
+
+
 from server import Handler
 
 class handler(Handler):

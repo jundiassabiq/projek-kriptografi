@@ -1,4 +1,8 @@
-"""Format file dan alur catatan. Tidak menyimpan data atau kunci di server."""
+"""
+Mengatur alur catatan: validasi input dan format file, pembentukan JSON, pemanggilan tiga algoritma, serta pemeriksaan hasil dekripsi identik. Tidak menyimpan catatan atau kunci.
+"""
+
+
 import json
 import re
 from crypto import pipeline, frequency

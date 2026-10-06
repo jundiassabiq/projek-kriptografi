@@ -1,3 +1,8 @@
+"""
+Mengenkripsi huruf melalui alfabet yang dibentuk dari kata kunci. Dekripsi memakai pemetaan terbalik; besar-kecil huruf dan karakter non-Latin dipertahankan.
+"""
+
+
 from .keys import validate
 
 ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'

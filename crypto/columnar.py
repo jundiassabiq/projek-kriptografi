@@ -1,3 +1,8 @@
+"""
+Mengacak posisi karakter berdasarkan urutan kolom kata kunci, lalu menyusunnya kembali saat dekripsi. Mendukung kolom tidak penuh tanpa padding.
+"""
+
+
 from .keys import validate
 
 def order_for(key):

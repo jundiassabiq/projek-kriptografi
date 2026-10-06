@@ -1,3 +1,8 @@
+"""
+Menggabungkan Monoalfabetik, Vigenère, dan Transposisi Kolom secara berurutan untuk enkripsi. Dekripsi memanggil ketiganya dalam urutan terbalik.
+"""
+
+
 from . import monoalphabetic, vigenere, columnar
 
 def encrypt(text, keys):

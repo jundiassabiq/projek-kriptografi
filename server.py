@@ -1,4 +1,8 @@
-"""Server lokal pustaka standar: python server.py, buka http://127.0.0.1:8000."""
+"""
+Menjalankan server web lokal, menyajikan HTML/CSS/JavaScript, dan menerima permintaan enkripsi serta dekripsi dari browser. Jalankan dengan python server.py.
+"""
+
+
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path

@@ -1,3 +1,8 @@
+"""
+Mengenkripsi dan mendekripsi dengan pergeseran huruf berdasarkan kunci berulang. Angka dan tanda baca tidak menghabiskan posisi kunci.
+"""
+
+
 from .keys import validate
 
 def transform(text, key, direction):

@@ -1,3 +1,8 @@
+"""
+Menghitung jumlah dan persentase kemunculan huruf A–Z pada cipherteks untuk tabel analisis frekuensi. File ini tidak melakukan enkripsi atau dekripsi.
+"""
+
+
 def analyze(text):
     # Hitung sendiri, tanpa library statistik/kriptanalisis.
     counts = {chr(65 + i): 0 for i in range(26)}
