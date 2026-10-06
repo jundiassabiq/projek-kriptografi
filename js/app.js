@@ -69,7 +69,7 @@ $('note-form').addEventListener('submit', async event => {
     // Snapshot input dan hasil Python ditampilkan sebagai teks, bukan HTML.
     $('encryption-code').textContent = 'Kode klien: ' + code;
     $('plaintext-preview').textContent = text;
-    $('ciphertext-preview').textContent = result.package.ciphertext;
+    $('ciphertext-preview').textContent = result.note_ciphertext;
     $('encryption-result').hidden = false;
     const blob = new Blob([JSON.stringify(result.package)], {type:'application/json;charset=utf-8'});
     const url = URL.createObjectURL(blob), link = document.createElement('a');

@@ -129,11 +129,11 @@ Menampilkan halaman RuangCatat: formulir catatan dan kunci, unggah file, hasil d
             <pre id="plaintext-preview" class="max-h-64 overflow-auto whitespace-pre-wrap break-all text-sm leading-relaxed"></pre>
           </div>
           <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-            <h3 class="mb-3 text-xs font-semibold">Cipherteks · hasil tiga algoritma</h3>
+            <h3 class="mb-3 text-xs font-semibold">Cipherteks · isi catatan (A–Z)</h3>
             <pre id="ciphertext-preview" class="max-h-64 overflow-auto whitespace-pre-wrap break-all text-sm leading-relaxed"></pre>
           </div>
         </div>
-        <p class="px-5 pb-5 text-xs leading-relaxed text-zinc-500">Kode dan catatan dibungkus menjadi JSON sebelum dienkripsi. Cipherteks ini sama dengan isi cipherteks pada file unduhan.</p>
+        <p class="px-5 pb-5 text-xs leading-relaxed text-zinc-500">Panel ini mengenkripsi isi catatan saja. File unduhan juga memuat kode dan penanda format yang dienkripsi. Pasangan huruf A–Z adalah encoding hasil akhir, bukan algoritma enkripsi tambahan.</p>
       </section>
       <section id="result" class="card" hidden>
         <div class="border-b border-zinc-200 p-5">
@@ -151,7 +151,7 @@ Menampilkan halaman RuangCatat: formulir catatan dan kunci, unggah file, hasil d
         </summary>
         <div class="border-t border-zinc-200 p-5">
           <p class="mb-4 text-xs leading-relaxed text-zinc-500">
-            Menghitung huruf A–Z dalam cipherteks. Ini analisis pola sederhana,
+            Menghitung huruf A–Z dalam cipherteks file unduhan. Ini analisis pola sederhana,
             bukan pemecahan tiga lapis enkripsi.
           </p>
           <p id="frequency-info" class="mb-3 text-xs text-zinc-500">
