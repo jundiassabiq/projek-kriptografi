@@ -39,7 +39,7 @@ function clearOutput() {
   $('plaintext-preview').textContent = ''; $('ciphertext-preview').textContent = '';
   $('result').hidden = true; $('result-code').textContent = ''; $('result-text').textContent = '';
   $('frequency-body').replaceChildren(); $('frequency-table').hidden = true;
-  $('frequency-info').textContent = 'Hasil muncul setelah enkripsi atau dekripsi.';
+  $('frequency-info').textContent = 'Tabel muncul setelah catatan dienkripsi atau dibuka kembali.';
   $('analysis').open = false;
 }
 function frequency(data) {
@@ -60,20 +60,20 @@ async function request(action, data) {
     response = await fetch('/api/' + action, {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data), signal: AbortSignal.timeout(30000)});
   } catch { throw new Error('Server tidak dapat dihubungi. Periksa koneksi, atau jalankan python server.py untuk versi lokal.'); }
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error || 'Proses gagal.');
+  if (!response.ok) throw new Error(result.error || 'Catatan belum dapat diproses. Coba kembali.');
   return result;
 }
 $('note-form').addEventListener('submit', async event => {
   event.preventDefault(); if (busy) return; clearOutput();
   try {
     const code = $('client-code').value.trim(), text = $('note-text').value, values = keys();
-    if (!/^[A-Za-z0-9_-]{1,32}$/.test(code)) throw new Error('Kode klien: 1–32 huruf/angka, tanda - atau _.');
-    if (!text.trim()) throw new Error('Isi catatan tidak boleh kosong.');
+    if (!/^[A-Za-z0-9_-]{1,32}$/.test(code)) throw new Error('Kode klien samaran: 1–32 huruf/angka, tanda - atau _.');
+    if (!text.trim()) throw new Error('Tuliskan catatan sesi atau muat dari file .txt terlebih dahulu.');
     setBusy(true);
     const result = await request('encrypt', {code, text, keys: values});
     if (!result.validated) throw new Error('Validasi gagal. File tidak diunduh.');
     // Snapshot input dan hasil Python ditampilkan sebagai teks, bukan HTML.
-    $('encryption-code').textContent = 'Kode klien: ' + code;
+    $('encryption-code').textContent = 'Kode klien samaran: ' + code;
     $('plaintext-preview').textContent = text;
     $('ciphertext-preview').textContent = result.note_ciphertext;
     $('encryption-result').hidden = false;
@@ -81,7 +81,7 @@ $('note-form').addEventListener('submit', async event => {
     const url = URL.createObjectURL(blob), link = document.createElement('a');
     link.href = url; link.download = result.filename; document.body.append(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    frequency(result.frequency); message('Validasi berhasil: hasil dekripsi identik. Unduhan file telah dimulai.');
+    frequency(result.frequency); message('Validasi berhasil: hasil dekripsi identik. Unduhan catatan konseling tersandi telah dimulai. Simpan file untuk dibuka kembali.');
   } catch (error) { message(error.message, true); }
   finally { setBusy(false); }
 });
@@ -91,10 +91,10 @@ async function selectPlaintext(files) {
     const file = validateFile(files, '.txt', 500 * 1024);
     setBusy(true);
     const text = await readPlaintext(file);
-    if ($('note-text').value && $('note-text').value !== text && !window.confirm('Ganti isi catatan yang sekarang dengan isi file ' + file.name + '?')) return;
+    if ($('note-text').value && $('note-text').value !== text && !window.confirm('Ganti catatan sesi yang sedang ditulis dengan isi file ' + file.name + '?')) return;
     $('note-text').value = text; clearOutput();
-    $('plain-file-name').textContent = 'Catatan diambil dari: ' + file.name;
-    message('Isi file .txt dimuat. Periksa catatan, isi kode dan tiga kunci, lalu klik Enkripsi & unduh.');
+    $('plain-file-name').textContent = 'Catatan sesi dimuat dari: ' + file.name;
+    message('Catatan sesi dari file .txt sudah dimuat. Tinjau isinya, isi kode klien dan tiga kunci, lalu klik Enkripsi & unduh catatan.');
   } catch (error) { message(error.message, true); }
   finally { setBusy(false); }
 }
@@ -103,9 +103,9 @@ function selectCiphertext(files) {
   try {
     const file = validateFile(files, '.json', MAX_FILE_BYTES);
     cipherFile = file; clearOutput();
-    $('cipher-file-name').textContent = 'File dipilih: ' + file.name;
+    $('cipher-file-name').textContent = 'File catatan: ' + file.name;
     $('decrypt').disabled = false;
-    message('File tersandi dipilih. Masukkan tiga kunci, lalu klik Dekripsi.');
+    message('File catatan konseling dipilih. Masukkan tiga kunci saat enkripsi, lalu klik Buka catatan.');
   } catch (error) { message(error.message, true); }
 }
 connectDropZone($('plain-drop'), $('plain-file'), selectPlaintext, () => busy);
@@ -120,23 +120,23 @@ $('decrypt').addEventListener('click', async () => {
   if (busy) return; clearOutput();
   try {
     const values = keys(), file = cipherFile;
-    if (!file) throw new Error('Pilih file tersandi terlebih dahulu.');
+    if (!file) throw new Error('Pilih file catatan konseling tersandi (.json) terlebih dahulu.');
     if (file.size > MAX_FILE_BYTES) throw new Error('Ukuran file maksimal 1 MB.');
     setBusy(true);
     let packageData;
     try { packageData = JSON.parse(await file.text()); }
     catch { throw new Error('File JSON rusak atau tidak valid.'); }
     const result = await request('decrypt', {package: packageData, keys: values});
-    $('result-code').textContent = result.code; $('result-text').textContent = result.text; $('result').hidden = false;
-    frequency(result.frequency); message('Catatan berhasil didekripsi.');
+    $('result-code').textContent = 'Kode klien samaran: ' + result.code; $('result-text').textContent = result.text; $('result').hidden = false;
+    frequency(result.frequency); message('Catatan konseling berhasil dibuka kembali.');
   } catch (error) { message(error.message, true); }
   finally { setBusy(false); }
 });
 $('clear').addEventListener('click', () => {
   $('note-form').reset(); toggleKeys(); clearOutput(); $('message').hidden = true; $('message').textContent = '';
   cipherFile = null;
-  $('plain-file-name').textContent = 'Opsional: isi file akan masuk ke kolom catatan dan bisa diedit.';
-  $('cipher-file-name').textContent = 'Belum ada file tersandi dipilih.';
+  $('plain-file-name').textContent = 'Sudah menulis catatan di file .txt? Muat di sini, lalu tinjau atau edit isinya.';
+  $('cipher-file-name').textContent = 'Belum ada file catatan yang dipilih.';
   for (const id of ['plain-drop', 'cipher-drop']) $(id).classList.remove('drag-active');
   $('decrypt').disabled = true;
 });
