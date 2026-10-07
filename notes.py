@@ -5,7 +5,7 @@ Mengatur alur catatan: validasi input dan format file, pembentukan JSON, pemangg
 
 import json
 import re
-from crypto import pipeline, frequency, alphabetic
+from crypto import pipeline, frequency, alphabetic, analysis
 from crypto.keys import validate
 
 FORMAT = 'ruangcatat-file-v4'
@@ -70,13 +70,16 @@ def encrypt_note(code, text, keys):
     return {'package': package, 'filename': code + '.json', 'validated': True,
             'note_raw_ciphertext': note_raw_ciphertext,
             'note_ciphertext': note_ciphertext,
-            'frequency': frequency.analyze(note_ciphertext)}
+            'frequency': frequency.analyze(note_ciphertext),
+            'analysis': analysis.compare(note_raw_ciphertext, note_ciphertext, len(keys['vigenere']))}
 
 def decrypt_note(package, keys):
     validate_keys(keys)
     payload = unpack(package, keys)
     # Pulihkan cipherteks khusus isi dengan kunci yang sama agar analisis
     # konsisten dengan panel enkripsi, tanpa menyertakan kode/penanda JSON.
-    note_ciphertext = alphabetic.encode(pipeline.encrypt(payload['text'], keys))
+    note_raw_ciphertext = pipeline.encrypt(payload['text'], keys)
+    note_ciphertext = alphabetic.encode(note_raw_ciphertext)
     return {'code': payload['code'], 'text': payload['text'],
-            'frequency': frequency.analyze(note_ciphertext)}
+            'frequency': frequency.analyze(note_ciphertext),
+            'analysis': analysis.compare(note_raw_ciphertext, note_ciphertext, len(keys['vigenere']))}

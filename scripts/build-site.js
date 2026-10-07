@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 const root = new URL("../", import.meta.url);
 const output = new URL("public/", root);
 mkdirSync(fileURLToPath(output), { recursive: true });
-for (const name of ["index.html", "css/style.css", "js/app.js", "js/files.js"]) {
+for (const name of ["index.html", "css/style.css", "js/app.js", "js/files.js", "js/analysis.js"]) {
   cpSync(
     fileURLToPath(new URL(name, root)),
     fileURLToPath(new URL(name, output)),

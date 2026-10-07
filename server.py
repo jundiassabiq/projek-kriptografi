@@ -7,12 +7,14 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from notes import encrypt_note, decrypt_note, MAX_FILE_BYTES
+from crypto.analysis import estimate
 
 ROOT = Path(__file__).resolve().parent
 MAX_REQUEST_BYTES = 2 * MAX_FILE_BYTES
 STATIC = {'/': ('index.html', 'text/html'), '/index.html': ('index.html', 'text/html'),
           '/css/style.css': ('css/style.css', 'text/css'), '/js/app.js': ('js/app.js', 'text/javascript'),
-          '/js/files.js': ('js/files.js', 'text/javascript')}
+          '/js/files.js': ('js/files.js', 'text/javascript'),
+          '/js/analysis.js': ('js/analysis.js', 'text/javascript')}
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):
@@ -42,7 +44,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(404, {'error': 'File web tidak ditemukan.'})
 
     def do_POST(self):
-        if self.path not in ('/api/encrypt', '/api/decrypt'):
+        if self.path not in ('/api/encrypt', '/api/decrypt', '/api/analysis'):
             self.send_json(404, {'error': 'Endpoint tidak ditemukan.'})
             return
         if self.headers.get('Content-Type', '').split(';')[0] != 'application/json':
@@ -58,6 +60,8 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError('Permintaan tidak valid.')
             if self.path == '/api/encrypt':
                 result = encrypt_note(data.get('code'), data.get('text'), data.get('keys'))
+            elif self.path == '/api/analysis':
+                result = estimate(data.get('length'), data.get('rate'), data.get('seconds'))
             else:
                 result = decrypt_note(data.get('package'), data.get('keys'))
             self.send_json(200, result)

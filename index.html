@@ -159,28 +159,63 @@ Menampilkan halaman RuangCatat: formulir catatan dan kunci, unggah file, hasil d
         ></pre>
       </section>
       <details id="analysis" class="card">
-        <summary class="cursor-pointer p-5 text-sm font-medium">
-          Analisis frekuensi catatan tersandi
-        </summary>
-        <div class="border-t border-zinc-200 p-5">
-          <p class="mb-4 text-xs leading-relaxed text-zinc-500">
-            Lihat jumlah dan persentase huruf A–Z pada cipherteks isi catatan saja, sesuai panel perbandingan. Kode klien dan penanda JSON tidak ikut dihitung.
-            Tabel membantu mempelajari pola cipherteks dan tidak membuka isi catatan atau menemukan kunci. Polanya juga dipengaruhi encoding A–Z.
-          </p>
-          <p id="frequency-info" class="mb-3 text-xs text-zinc-500">
-            Tabel muncul setelah catatan dienkripsi atau dibuka kembali.
-          </p>
-          <div id="frequency-table" class="max-h-64 overflow-auto" hidden>
-            <table class="w-full text-left text-xs">
-              <thead>
-                <tr class="border-b border-zinc-200">
-                  <th class="py-2">Huruf</th>
-                  <th>Jumlah</th>
-                  <th>Persentase</th>
-                </tr>
-              </thead>
-              <tbody id="frequency-body"></tbody>
-            </table>
+        <summary class="cursor-pointer p-5 text-sm font-medium">Analisis kriptanalisis catatan tersandi</summary>
+        <div class="border-t border-zinc-200 space-y-6 p-5">
+          <p id="frequency-info" class="text-xs text-zinc-500" aria-live="polite">Analisis muncul setelah catatan dienkripsi atau dibuka kembali.</p>
+          <div id="analysis-content" class="space-y-6" hidden>
+            <section class="space-y-3" aria-labelledby="frequency-title">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <h3 id="frequency-title" class="text-sm font-semibold">Frekuensi isi catatan</h3>
+                <label class="label" for="frequency-stage">Tabel frekuensi
+                  <select id="frequency-stage" class="field">
+                    <option value="after">Sesudah encode A–Z</option>
+                    <option value="before">Sebelum encode</option>
+                  </select>
+                </label>
+              </div>
+              <p class="text-xs leading-relaxed text-zinc-500">Hanya cipherteks isi catatan yang dihitung. Kode klien dan JSON tidak ikut dihitung. Huruf besar/kecil digabung; karakter di luar A–Z diabaikan.</p>
+              <div id="frequency-table" class="max-h-64 overflow-auto" hidden>
+                <table class="w-full text-left text-xs">
+                  <thead><tr class="border-b border-zinc-200"><th class="py-2">Huruf</th><th>Jumlah</th><th>Persentase</th></tr></thead>
+                  <tbody id="frequency-body"></tbody>
+                </table>
+              </div>
+              <h4 class="text-xs font-semibold">Perbandingan distribusi huruf</h4>
+              <p class="text-xs text-zinc-500">Abu-abu: sebelum encode · Hitam: sesudah encode. Lebar batang memakai skala 0–100% yang sama; arahkan kursor untuk melihat jumlah.</p>
+              <div id="frequency-chart" class="frequency-chart" tabindex="0" role="group" aria-label="Grafik frekuensi A sampai Z sebelum dan sesudah encode"></div>
+              <p class="text-xs leading-relaxed text-zinc-500">Encoding membentuk pola baru dan tidak menjamin distribusi lebih rata. Analisis ini tidak menemukan kunci atau membuka catatan otomatis.</p>
+            </section>
+            <section class="space-y-3 border-t border-zinc-200 pt-5" aria-labelledby="ic-title">
+              <h3 id="ic-title" class="text-sm font-semibold">Index of Coincidence (IC)</h3>
+              <p class="text-xs leading-relaxed text-zinc-500">Indikator peluang dua huruf dari posisi berbeda memiliki nilai yang sama. IC = Σ f(f−1) / [N(N−1)].</p>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4"><p class="text-xs text-zinc-500">Sebelum encode</p><p id="ic-before" class="mt-2 text-lg font-semibold"></p><p id="ic-before-count" class="mt-1 text-xs text-zinc-500"></p></div>
+                <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4"><p class="text-xs text-zinc-500">Sesudah encode</p><p id="ic-after" class="mt-2 text-lg font-semibold"></p><p id="ic-after-count" class="mt-1 text-xs text-zinc-500"></p></div>
+              </div>
+              <p class="text-xs leading-relaxed text-zinc-500">Acuan model huruf independen dan merata: 1/26 ≈ 0,0385. IC bukan nilai keamanan. Sampel pendek dapat berfluktuasi; IC sesudah encode juga dipengaruhi pola encoding. Kurang dari dua huruf ditampilkan sebagai data belum cukup.</p>
+            </section>
+            <section class="space-y-3 border-t border-zinc-200 pt-5" aria-labelledby="estimate-title">
+              <h3 id="estimate-title" class="text-sm font-semibold">Estimasi brute force Vigenère</h3>
+              <p class="text-xs leading-relaxed text-zinc-500">Simulasi matematis: kunci Monoalfabetik dan Transposisi dianggap diketahui, panjang Vigenère diketahui, dan setiap kandidat A–Z sama mungkin. Kandidat dicoba tanpa pengulangan. Ini bukan serangan nyata atau estimasi keamanan seluruh rangkaian.</p>
+              <p class="text-xs">Panjang kunci Vigenère saat proses: <strong id="estimate-length"></strong></p>
+              <form id="estimate-form" class="grid gap-3 sm:grid-cols-2">
+                <label class="label" for="estimate-rate">Asumsi percobaan per detik<input id="estimate-rate" class="field" type="number" min="1" max="1000000000000" step="1" value="1000000" required /></label>
+                <label class="label" for="estimate-seconds">Durasi percobaan (detik)<input id="estimate-seconds" class="field" type="number" min="1" max="1000000000000" step="1" value="60" required /></label>
+                <div><button id="estimate-submit" class="secondary" type="submit">Hitung estimasi</button></div>
+              </form>
+              <p id="estimate-error" class="text-xs text-red-800" role="alert" hidden></p>
+              <div id="estimate-result" class="space-y-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4" aria-live="polite" hidden>
+                <dl class="estimate-grid">
+                  <dt>Jumlah kandidat (26ᴸ)</dt><dd id="estimate-space"></dd>
+                  <dt>Kandidat berbeda yang dicoba</dt><dd id="estimate-attempts"></dd>
+                  <dt>Peluang kunci tercakup</dt><dd id="estimate-probability"></dd>
+                  <dt>Waktu rata-rata pencarian</dt><dd id="estimate-average"></dd>
+                  <dt>Waktu seluruh kandidat</dt><dd id="estimate-full"></dd>
+                </dl>
+              </div>
+              <p class="text-xs leading-relaxed text-zinc-500">N = 26ᴸ; B = min(R × durasi, N); P = B/N × 100%; waktu seluruh = N/R; waktu rata-rata = (N+1)/(2R). R adalah asumsi, bukan benchmark. Tahun dihitung sebagai 365,25 hari.</p>
+              <p class="text-xs leading-relaxed text-zinc-500">Peluang 100% berarti seluruh kandidat tercakup dalam model, bukan jaminan catatan dibobol. Mengenali hasil yang benar membutuhkan pemeriksaan tambahan; format JSON membantu tetapi bukan autentikasi. Encoding A–Z tidak memakai kunci dan tidak menambah keamanan.</p>
+            </section>
           </div>
         </div>
       </details>

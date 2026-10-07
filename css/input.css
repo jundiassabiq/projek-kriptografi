@@ -46,3 +46,17 @@ Sumber Tailwind dan aturan tampilan aplikasi. File ini dikompilasi melalui npm r
   .drop-zone.drag-active { @apply border-zinc-900 bg-zinc-100; }
   .drop-zone[aria-disabled="true"] { cursor: not-allowed; opacity: .45; }
 }
+
+/* Grafik HTML memakai persen yang dihitung Python, tanpa library grafik. */
+.frequency-chart { max-height: 22rem; overflow: auto; padding: .5rem; border: 1px solid #e4e4e7; border-radius: .5rem; }
+.frequency-chart-row { display: grid; grid-template-columns: 1rem minmax(0,1fr) 7.5rem; align-items: center; gap: .5rem; padding: .35rem 0; font-size: .7rem; }
+.frequency-chart-tracks { display: grid; gap: .2rem; }
+.frequency-chart-track { height: .4rem; background: #f4f4f5; border-radius: .2rem; overflow: hidden; }
+.frequency-chart-bar { height: 100%; }
+.frequency-chart-bar.before { background: #a1a1aa; }
+.frequency-chart-bar.after { background: #18181b; }
+.frequency-chart-values { text-align: right; font-variant-numeric: tabular-nums; }
+.estimate-grid { display: grid; gap: .5rem; font-size: .75rem; }
+.estimate-grid dt { color: #71717a; }
+.estimate-grid dd { margin: 0 0 .5rem; font-weight: 600; overflow-wrap: anywhere; }
+@media (min-width: 640px) { .estimate-grid { grid-template-columns: minmax(0,1fr) minmax(0,1fr); } .estimate-grid dd { margin-bottom: 0; } }

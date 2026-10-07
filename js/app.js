@@ -4,6 +4,7 @@ Mengatur interaksi halaman: membaca formulir dan kunci, mengirim permintaan ke P
 
 
 import {validateFile, readPlaintext, connectDropZone} from './files.js';
+import {initAnalysis, renderAnalysis, clearAnalysis, setAnalysisBusy} from './analysis.js';
 
 const $ = id => document.getElementById(id);
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -27,7 +28,7 @@ function keys() {
   return values;
 }
 function setBusy(value) {
-  busy = value;
+  busy = value; setAnalysisBusy(value);
   for (const element of $('note-form').querySelectorAll('input, textarea, button')) element.disabled = value;
   $('decrypt').disabled = value || !cipherFile;
   for (const id of ['plain-drop', 'cipher-drop']) {
@@ -38,21 +39,7 @@ function clearOutput() {
   $('encryption-result').hidden = true; $('encryption-code').textContent = '';
   $('plaintext-preview').textContent = ''; $('raw-ciphertext-preview').textContent = ''; $('ciphertext-preview').textContent = '';
   $('result').hidden = true; $('result-code').textContent = ''; $('result-text').textContent = '';
-  $('frequency-body').replaceChildren(); $('frequency-table').hidden = true;
-  $('frequency-info').textContent = 'Tabel muncul setelah catatan dienkripsi atau dibuka kembali.';
-  $('analysis').open = false;
-}
-function frequency(data) {
-  $('frequency-body').replaceChildren();
-  for (const item of data.rows) {
-    const row = document.createElement('tr'); row.className = 'border-b border-zinc-100';
-    for (const value of [item.letter, item.count, item.percent.toFixed(2) + '%']) {
-      const cell = document.createElement('td'); cell.className = 'py-2'; cell.textContent = value; row.append(cell);
-    }
-    $('frequency-body').append(row);
-  }
-  $('frequency-info').textContent = 'Total huruf A–Z: ' + data.total;
-  $('frequency-table').hidden = false;
+  clearAnalysis(); $('analysis').open = false;
 }
 async function request(action, data) {
   let response;
@@ -82,7 +69,7 @@ $('note-form').addEventListener('submit', async event => {
     const url = URL.createObjectURL(blob), link = document.createElement('a');
     link.href = url; link.download = result.filename; document.body.append(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    frequency(result.frequency); message('Validasi berhasil: hasil dekripsi identik. Unduhan catatan konseling tersandi telah dimulai. Simpan file untuk dibuka kembali.');
+    renderAnalysis(result.analysis); message('Validasi berhasil: hasil dekripsi identik. Unduhan catatan konseling tersandi telah dimulai. Simpan file untuk dibuka kembali.');
   } catch (error) { message(error.message, true); }
   finally { setBusy(false); }
 });
@@ -129,7 +116,7 @@ $('decrypt').addEventListener('click', async () => {
     catch { throw new Error('File JSON rusak atau tidak valid.'); }
     const result = await request('decrypt', {package: packageData, keys: values});
     $('result-code').textContent = 'Kode klien samaran: ' + result.code; $('result-text').textContent = result.text; $('result').hidden = false;
-    frequency(result.frequency); message('Catatan konseling berhasil dibuka kembali.');
+    renderAnalysis(result.analysis); message('Catatan konseling berhasil dibuka kembali.');
   } catch (error) { message(error.message, true); }
   finally { setBusy(false); }
 });
@@ -149,3 +136,6 @@ function toggleKeys() {
 }
 $('show-keys').addEventListener('change', toggleKeys);
 
+
+initAnalysis(request);
+clearAnalysis();
