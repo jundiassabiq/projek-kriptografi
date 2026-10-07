@@ -132,17 +132,21 @@ Menampilkan halaman RuangCatat: formulir catatan dan kunci, unggah file, hasil d
           <h2 id="encryption-title" class="text-sm font-semibold">Catatan sesi sebelum dan sesudah enkripsi</h2>
           <p id="encryption-code" class="mt-1 text-xs text-zinc-500"></p>
         </div>
-        <div class="grid gap-4 p-5 sm:grid-cols-2">
+        <div class="grid gap-4 p-5 sm:grid-cols-3">
           <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
             <h3 class="mb-3 text-xs font-semibold">Catatan sesi · sebelum enkripsi</h3>
             <pre id="plaintext-preview" class="max-h-64 overflow-auto whitespace-pre-wrap break-all text-sm leading-relaxed"></pre>
           </div>
           <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-            <h3 class="mb-3 text-xs font-semibold">Catatan tersandi · sesudah enkripsi (A–Z)</h3>
+            <h3 class="mb-3 text-xs font-semibold">Hasil tiga algoritma · sebelum encode</h3>
+            <pre id="raw-ciphertext-preview" class="max-h-64 overflow-auto whitespace-pre-wrap break-all text-sm leading-relaxed"></pre>
+          </div>
+          <div class="min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <h3 class="mb-3 text-xs font-semibold">Hasil encode · huruf A–Z</h3>
             <pre id="ciphertext-preview" class="max-h-64 overflow-auto whitespace-pre-wrap break-all text-sm leading-relaxed"></pre>
           </div>
         </div>
-        <p class="px-5 pb-5 text-xs leading-relaxed text-zinc-500">Bandingkan isi catatan yang kamu tulis dengan bentuk tersandinya. File unduhan menyertakan kode klien dan isi catatan dalam bentuk terenkripsi; simpan file untuk dibuka kembali.</p>
+        <p class="px-5 pb-5 text-xs leading-relaxed text-zinc-500">Ikuti perubahan isi catatan: teks asli → hasil Monoalfabetik, Vigenère, dan Transposisi Kolom → encoding A–Z. Ketiga panel hanya menampilkan isi catatan. Frekuensi dihitung dari hasil encode; file unduhan menyertakan kode klien dan penanda format yang ikut dienkripsi.</p>
       </section>
       <section id="result" class="card" hidden>
         <div class="border-b border-zinc-200 p-5">

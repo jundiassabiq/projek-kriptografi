@@ -36,7 +36,7 @@ function setBusy(value) {
 }
 function clearOutput() {
   $('encryption-result').hidden = true; $('encryption-code').textContent = '';
-  $('plaintext-preview').textContent = ''; $('ciphertext-preview').textContent = '';
+  $('plaintext-preview').textContent = ''; $('raw-ciphertext-preview').textContent = ''; $('ciphertext-preview').textContent = '';
   $('result').hidden = true; $('result-code').textContent = ''; $('result-text').textContent = '';
   $('frequency-body').replaceChildren(); $('frequency-table').hidden = true;
   $('frequency-info').textContent = 'Tabel muncul setelah catatan dienkripsi atau dibuka kembali.';
@@ -75,6 +75,7 @@ $('note-form').addEventListener('submit', async event => {
     // Snapshot input dan hasil Python ditampilkan sebagai teks, bukan HTML.
     $('encryption-code').textContent = 'Kode klien samaran: ' + code;
     $('plaintext-preview').textContent = text;
+    $('raw-ciphertext-preview').textContent = result.note_raw_ciphertext;
     $('ciphertext-preview').textContent = result.note_ciphertext;
     $('encryption-result').hidden = false;
     const blob = new Blob([JSON.stringify(result.package)], {type:'application/json;charset=utf-8'});
