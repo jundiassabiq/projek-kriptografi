@@ -62,16 +62,19 @@ def encrypt_note(code, text, keys):
     validate_package(package)
     if unpack(package, keys) != payload:
         raise ValueError('Validasi gagal. File tidak dibuat.')
-    # Panel hanya memperlihatkan hasil enkripsi isi, tanpa kode/penanda JSON.
+    # Panel dan analisis frekuensi memakai cipherteks isi, tanpa kode/penanda JSON.
     note_ciphertext = alphabetic.encode(pipeline.encrypt(text, keys))
     if pipeline.decrypt(alphabetic.decode(note_ciphertext), keys) != text:
         raise ValueError('Validasi gagal. File tidak dibuat.')
     return {'package': package, 'filename': code + '.json', 'validated': True,
             'note_ciphertext': note_ciphertext,
-            'frequency': frequency.analyze(package['ciphertext'])}
+            'frequency': frequency.analyze(note_ciphertext)}
 
 def decrypt_note(package, keys):
     validate_keys(keys)
     payload = unpack(package, keys)
+    # Pulihkan cipherteks khusus isi dengan kunci yang sama agar analisis
+    # konsisten dengan panel enkripsi, tanpa menyertakan kode/penanda JSON.
+    note_ciphertext = alphabetic.encode(pipeline.encrypt(payload['text'], keys))
     return {'code': payload['code'], 'text': payload['text'],
-            'frequency': frequency.analyze(package['ciphertext'])}
+            'frequency': frequency.analyze(note_ciphertext)}
